@@ -30,12 +30,13 @@ const ReviewsCard = ({ productReviews }) => {
                                         <img src={CommentorIcon} alt="" className="h-14 w-14" />
                                         <div className="space-y-1">
                                             <p className="text-lg font-medium underline capitalize underline-offset-4 text-blue-400">
-                                                {review.userId.username}
+                                                {/* ✅ Fixed: Optional chaining lagayi hai taake null error na aaye */}
+                                                {review?.userId?.username || "Guest User"}
                                             </p>
                                             <p className="text-[12px] italic">
-                                                {formatDate(review.createdAt)}
+                                                {formatDate(review?.createdAt)}
                                             </p>
-                                            <RatingStars rating={review.rating}/>
+                                            <RatingStars rating={review?.rating}/>
                                         </div>
                                     </div>
 

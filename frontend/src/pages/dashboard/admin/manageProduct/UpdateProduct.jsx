@@ -214,9 +214,9 @@ import SelectInput from '../addProduct/SelectInput';
 import { useFetchProductByIdQuery, useUpdateProductMutation } from '../../../../redux/features/products/productsApi';
 
 const categoryData = {
-    men: ['shirts', 'jeans', 'watches', 'shoes', 'jackets', 't-shirts', 'belts', 'wallets', 'suits', 'shorts'],
-    women: ['dress', 'jewellery', 'cosmetics', 'handbags', 'heels', 'tops', 'skirts', 'scarves', 'sunglasses', 'lingerie'],
-    kids: ['toys', 'baby suit', 'school bags', 'pajamas', 'sneakers', 'hats', 'socks', 'raincoats', 'gloves', 'diapers']
+    men: ['shirts', 'pants', 'watches', 'shoes', 'jackets'],
+    women: ['dress', 'jewellery', 'cosmetics', 'handbags', 'shirts','jackets'],
+    kids: ['kids suit', 't-shirts', 'shoes', 'pants', 'jackets']
 };
 
 const sizeOptionsData = {
@@ -237,7 +237,8 @@ const colorOptions = [
     { value: 'black', label: 'Black' }, { value: 'red', label: 'Red' },
     { value: 'blue', label: 'Blue' }, { value: 'white', label: 'White' },
     { value: 'gold', label: 'Gold' }, { value: 'silver', label: 'Silver' },
-    { value: 'green', label: 'Green' }
+    { value: 'green', label: 'Green' }, { value: 'beige', label: 'Beige' }, 
+    { value: 'purple', label: 'Purple' }, { value: 'orange', label: 'Orange' },
 ];
 
 const UpdateProduct = () => {
@@ -251,7 +252,7 @@ const UpdateProduct = () => {
         color: [], 
         size: [],  
         price: '',
-        stock: '', //  Added Stock State
+        stock: '',
         description: '',
         image: []
     });
@@ -261,26 +262,28 @@ const UpdateProduct = () => {
     const [availableSizeOptions, setAvailableSizeOptions] = useState([]);
     const [newImage, setNewImage] = useState(null);
 
-    const { data: productData, isLoading: isProductLoading, error: fetchError, refetch } = useFetchProductByIdQuery(id);
+    const { data: productData, isLoading: isProductLoading, refetch } = useFetchProductByIdQuery(id);
     const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
 
-    //  Load existing product data including stock
+    // Load Initial Data
     useEffect(() => {
         if (productData?.product) {
             const p = productData.product;
+            const initialCategory = p.category || '';
+            
             setProduct({
                 name: p.name || '',
-                category: p.category || '',
+                category: initialCategory,
                 color: Array.isArray(p.color) ? p.color : [], 
                 size: Array.isArray(p.size) ? p.size : [],
                 price: p.price || '',
-                stock: p.stock || '', //  Setting initial stock value
+                stock: p.stock || '', 
                 description: p.description || '',
                 image: p.image || []
             });
 
             for (const main in categoryData) {
-                if (categoryData[main].includes(p.category)) {
+                if (categoryData[main].includes(initialCategory.toLowerCase())) {
                     setMainCategory(main);
                     setSubCategories(categoryData[main]);
                     break;
@@ -289,11 +292,21 @@ const UpdateProduct = () => {
         }
     }, [productData]);
 
+    // Update Size Options whenever category changes
     useEffect(() => {
-        const subCat = product.category.toLowerCase();
-        if (['shoes', 'sneakers', 'heels'].includes(subCat)) {
+        if (!product.category) {
+            setAvailableSizeOptions([]);
+            return;
+        }
+
+        const subCat = product.category.toLowerCase().trim();
+        
+        const footwearItems = ['shoes', 'sneakers', 'heels', 'footwear'];
+        const clothingItems = ['shirts', 't-shirts', 'dress', 'jackets', 'pants', 'kids suit', 'suits', 'jeans'];
+
+        if (footwearItems.includes(subCat)) {
             setAvailableSizeOptions(sizeOptionsData.footwear);
-        } else if (['shirts', 't-shirts', 'dress', 'jackets', 'suits'].includes(subCat)) {
+        } else if (clothingItems.includes(subCat)) {
             setAvailableSizeOptions(sizeOptionsData.clothing);
         } else {
             setAvailableSizeOptions([]);
@@ -303,21 +316,21 @@ const UpdateProduct = () => {
     const handleMainCategoryChange = (e) => {
         const selectedMain = e.target.value;
         setMainCategory(selectedMain);
-        setProduct({ ...product, category: '' });
+        setProduct(prev => ({ ...prev, category: '', size: [] }));
         setSubCategories(categoryData[selectedMain] || []);
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setProduct({ ...product, [name]: value });
+        setProduct(prev => ({ ...prev, [name]: value }));
     };
 
     const handleColorChange = (selected) => {
-        setProduct({ ...product, color: selected ? selected.map(opt => opt.value) : [] });
+        setProduct(prev => ({ ...prev, color: selected ? selected.map(opt => opt.value) : [] }));
     };
 
     const handleSizeChange = (selected) => {
-        setProduct({ ...product, size: selected ? selected.map(opt => opt.value) : [] });
+        setProduct(prev => ({ ...prev, size: selected ? selected.map(opt => opt.value) : [] }));
     };
 
     const handleSubmit = async (e) => {
@@ -341,7 +354,9 @@ const UpdateProduct = () => {
             ...base,
             border: '1px solid #d1d5db',
             borderRadius: '0.375rem',
-            padding: '2px'
+            padding: '2px',
+            boxShadow: 'none',
+            '&:hover': { border: '1px solid #6366f1' }
         })
     };
 
@@ -357,7 +372,11 @@ const UpdateProduct = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                         <label className="block text-sm font-medium text-gray-700">Main Category</label>
-                        <select value={mainCategory} onChange={handleMainCategoryChange} className="add-product-InputCSS">
+                        <select 
+                            value={mainCategory} 
+                            onChange={handleMainCategoryChange} 
+                            className="w-full p-2 border rounded-md outline-none focus:border-indigo-500"
+                        >
                             <option value="">Select Main Category</option>
                             <option value="men">Men</option>
                             <option value="women">Women</option>
@@ -369,6 +388,7 @@ const UpdateProduct = () => {
                         name="category"
                         value={product.category}
                         onChange={handleChange}
+                        // Important: passing value as it is, and showing label as Uppercase
                         options={subCategories.map(sub => ({ label: sub.toUpperCase(), value: sub }))}
                     />
                 </div>
@@ -388,28 +408,20 @@ const UpdateProduct = () => {
                         <label className="block text-sm font-medium text-gray-700">Sizes</label>
                         <Select
                             isMulti
+                            key={`size-select-${product.category}`} // Force re-render when category changes
                             options={availableSizeOptions}
                             styles={customSelectStyles}
                             value={availableSizeOptions.filter(opt => product.size.includes(opt.value))}
                             onChange={handleSizeChange}
+                            placeholder={availableSizeOptions.length === 0 ? "No sizes available" : "Select Sizes"}
                             isDisabled={availableSizeOptions.length === 0}
                         />
                     </div>
                 </div>
 
-                {/* Updated Row: Price, Stock, and Image */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <TextInput label="Price" name="price" type="number" value={product.price} onChange={handleChange} />
-                    
-                    {/*  New Stock Input Field for Update */}
-                    <TextInput 
-                        label="Update Stock" 
-                        name="stock" 
-                        type="number" 
-                        value={product.stock} 
-                        onChange={handleChange} 
-                    />
-
+                    <TextInput label="Update Stock" name="stock" type="number" value={product.stock} onChange={handleChange} />
                     <UploadImage name="image" id="image" value={newImage || product.image} setImage={setNewImage} />
                 </div>
 
@@ -418,10 +430,11 @@ const UpdateProduct = () => {
                     name="description" 
                     value={product.description} 
                     onChange={handleChange} 
-                    className="add-product-InputCSS w-full p-3 border rounded-md" 
+                    className="w-full p-3 border rounded-md outline-none focus:border-indigo-500" 
+                    placeholder="Product Description"
                 />
 
-                <button type="submit" className="add-product-btn w-full bg-indigo-600 text-white py-3 rounded-md font-bold hover:bg-indigo-700 transition-all" disabled={isUpdating}>
+                <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-md font-bold hover:bg-indigo-700 transition-all" disabled={isUpdating}>
                     {isUpdating ? 'Updating...' : 'Update Product'}
                 </button>
             </form>
