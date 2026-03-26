@@ -1,41 +1,48 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ProductCards from '../shop/ProductCards';
-// JSON file ki jagah apni Redux API use karein
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi';
 
 const CategoryPage = () => {
-    const { categoryName } = useParams();
+    const { categoryName } = useParams(); // URL se 'men', 'dress', etc milega
     
-    // Database se products mangwaein filter ke saath
-    const { data: { products = [] } = {}, error, isLoading } = useFetchAllProductsQuery({
-        category: categoryName,
-        limit: 100 // taake saari products aa jayein
-    });
+    // ✅ CONDITION: Agar click 'men' par hua hai to mainCategory use karo
+    // Baqi sab (dress, jewellery) ke liye purana 'category' filter hi chalega
+    const queryParams = {
+        category: categoryName === 'men' ? '' : categoryName,
+        mainCategory: categoryName === 'men' ? 'men' : '',
+        limit: 100 
+    };
+
+    const { data, error, isLoading } = useFetchAllProductsQuery(queryParams);
+
+    // Data handling safety
+    const products = data?.products || data || [];
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [categoryName]);
 
-    if (isLoading) return <div className="p-10 text-center font-bold text-indigo-600">Loading Products...</div>;
-    if (error) return <div className="p-10 text-red-500 text-center">Error fetching products: {error.message}</div>;
+    if (isLoading) return <div className="p-10 text-center font-bold text-primary">Loading...</div>;
+    if (error) return <div className="p-10 text-red-500 text-center">Error fetching products.</div>;
 
     return (
         <>
-            <section className='section__container bg-primary-light'>
-                <h2 className="section__header capitalize">{categoryName}</h2>
+            <section className='section__container bg-primary-light text-center'>
+                <h2 className="section__header capitalize">{categoryName} Collection</h2>
                 <p className="section__subheader">
-                    Browse a diverse range of categories, from chic dresses to versatile accessories. Elevate your style today!
+                    Browse our premium {categoryName} items.
                 </p>
             </section>
 
-            {/* products card */}
             <div className='section__container'>
                 {products.length > 0 ? (
                     <ProductCards products={products} />
                 ) : (
-                    <div className="text-center py-10 text-gray-500">
-                        No products found in "{categoryName}" category.
+                    <div className="text-center py-20 bg-gray-50 rounded-lg">
+                        <p className="text-gray-500 font-medium">
+                            No products found in "{categoryName}".
+                        </p>
                     </div>
                 )}
             </div>

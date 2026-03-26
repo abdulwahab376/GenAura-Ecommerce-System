@@ -271,10 +271,10 @@ nav {
   font-family: var(--header-font);
 }
 
-.product__card__content p {
+/* .product__card__content p {
   font-weight: 500;
   color: var(--text-dark);
-}
+} */
 
 .product__card__content p s {
   font-size: 0.9rem;

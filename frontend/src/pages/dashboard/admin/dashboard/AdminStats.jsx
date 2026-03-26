@@ -88,7 +88,8 @@ const AdminStats = ({ stats }) => {
                     <div>
                         <p className="text-[10px] uppercase tracking-widest font-bold text-emerald-900/40">Revenue</p>
                         <h2 className="text-xl font-black text-emerald-950">
-                            ${Math.round(stats.totalEarnings || 0).toLocaleString()}
+                            {/* ✅ Updated to Rs. and formatted with toLocaleString */}
+                            Rs. {Math.round(stats.totalEarnings || 0).toLocaleString()}
                         </h2>
                     </div>
                 </div>
