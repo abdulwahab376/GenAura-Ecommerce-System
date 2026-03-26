@@ -11,14 +11,22 @@ const PaymentChat = () => {
     const statusKey = `chat_${orderId}_status`;
     const channel = new BroadcastChannel('payment_sync');
 
-    // ✅ Replaced the buggy scrollIntoView with a strict container ref
     const chatContainerRef = useRef(null);
     const fileInputRef = useRef(null);
 
+    // ✅ Updated Instructions with JazzCash and Account Title
     const initialAdminMessage = {
         id: 1,
         sender: 'admin',
-        text: `Hello! Please complete your payment of $${amount.toFixed(2)} using:\n• Easypaisa: 03XXXXXXXXX\n• Bank Transfer: XXXX-XXXX-XXXX-XXXX\n\nAfter sending, please upload your receipt here.`
+        text: `Hello! Please complete your payment of Rs. ${amount.toLocaleString()} using:
+
+• Easypaisa: 03XXXXXXXXX
+• JazzCash: 03XXXXXXXXX
+• Bank Transfer: XXXX-XXXX-XXXX-XXXX
+
+Account Title: Abdul Wahab
+
+After sending, please upload your receipt here.`
     };
 
     const [messages, setMessages] = useState(() => {
@@ -31,11 +39,9 @@ const PaymentChat = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
 
-    // States for Editing
     const [editingMessageId, setEditingMessageId] = useState(null);
     const [existingImageUrl, setExistingImageUrl] = useState(null);
 
-    // ✅ Sync with Admin Tab updates
     useEffect(() => {
         channel.onmessage = (event) => {
             if (event.data?.messages && event.data?.orderId === orderId) {
@@ -48,14 +54,12 @@ const PaymentChat = () => {
         return () => channel.close();
     }, [orderId, storageKey, statusKey]);
 
-    // ✅ THE SCROLL FIX: Only scroll the chat div, never the whole page!
     useEffect(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
     }, [messages]);
 
-    // Generate Image Preview URL instantly when user selects a new file
     useEffect(() => {
         if (!selectedFile) return;
         const url = URL.createObjectURL(selectedFile);
@@ -73,15 +77,12 @@ const PaymentChat = () => {
         });
     };
 
-    // ✅ Handle Sending (Text/Image) OR Updating an existing message (Text/Image)
     const handleSendOrUpdate = (e) => {
         e.preventDefault();
         if (!inputText.trim() && !selectedFile && !previewUrl) return;
 
-        // --- UPDATE EXISTING MESSAGE ---
         if (editingMessageId) {
             if (selectedFile) {
-                // User attached a NEW image during edit
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     const updated = messages.map(m =>
@@ -93,9 +94,7 @@ const PaymentChat = () => {
                 reader.readAsDataURL(selectedFile);
                 return;
             } else {
-                // User just edited text, or deleted the image without adding a new one
-                const finalImageUrl = previewUrl ? existingImageUrl : null; // If previewUrl is null, they clicked 'X'
-
+                const finalImageUrl = previewUrl ? existingImageUrl : null;
                 const updated = messages.map(m =>
                     m.id === editingMessageId ? { ...m, text: inputText.trim(), imageUrl: finalImageUrl } : m
                 );
@@ -105,7 +104,6 @@ const PaymentChat = () => {
             }
         }
 
-        // --- SEND NEW MESSAGE ---
         if (selectedFile) {
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -123,7 +121,6 @@ const PaymentChat = () => {
         }
     };
 
-    // ✅ WhatsApp Style Edit/Delete/Clear Features
     const handleDelete = (id) => {
         const updated = messages.filter(m => m.id !== id);
         syncAndBroadcast(updated);
@@ -132,8 +129,6 @@ const PaymentChat = () => {
     const handleEdit = (msg) => {
         setEditingMessageId(msg.id);
         setInputText(msg.text || '');
-
-        // If the message has an image, load it into the preview box!
         if (msg.imageUrl) {
             setPreviewUrl(msg.imageUrl);
             setExistingImageUrl(msg.imageUrl);
@@ -179,13 +174,13 @@ const PaymentChat = () => {
                         </button>
                     </div>
 
-                    {/* ✅ ATTACHED THE STRICT SCROLL REF HERE */}
                     <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2">
                         {messages.map((msg) => (
                             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[75%] flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'} group`}>
-
-                                    <div className={`p-3 rounded-xl text-sm shadow-sm ${msg.sender === 'admin' ? 'bg-white border text-gray-700' : 'bg-indigo-600 text-white'}`}>
+                                    
+                                    {/* ✅ Added bg-indigo-50 for Admin messages for a light color background */}
+                                    <div className={`p-3 rounded-xl text-sm shadow-sm ${msg.sender === 'admin' ? 'bg-indigo-50 border-indigo-100 border text-gray-700' : 'bg-indigo-600 text-white'}`}>
                                         {msg.imageUrl && (
                                             <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer">
                                                 <img src={msg.imageUrl} alt="Receipt" className="max-w-[200px] rounded-lg mb-2 cursor-pointer hover:opacity-90 transition-opacity" />
@@ -194,7 +189,6 @@ const PaymentChat = () => {
                                         {msg.text && <p className="whitespace-pre-line">{msg.text}</p>}
                                     </div>
 
-                                    {/* Edit/Delete Actions */}
                                     {msg.sender === 'user' && (
                                         <div className="flex gap-3 mt-1 text-[10px] font-bold text-gray-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity px-1">
                                             <button onClick={() => handleEdit(msg)} className="hover:text-indigo-600">✏️ Edit</button>
@@ -206,7 +200,6 @@ const PaymentChat = () => {
                         ))}
                     </div>
 
-                    {/* PREVIEW AREA */}
                     {previewUrl && (
                         <div className="mb-3 relative inline-block border-2 border-dashed border-indigo-300 p-2 rounded-xl bg-indigo-50">
                             <img src={previewUrl} alt="Preview" className="h-24 object-contain rounded-lg shadow-sm" />
@@ -220,7 +213,6 @@ const PaymentChat = () => {
                         </div>
                     )}
 
-                    {/* INPUT FORM */}
                     <form onSubmit={handleSendOrUpdate} className="flex flex-col gap-2">
                         {editingMessageId && (
                             <div className="flex justify-between items-center bg-yellow-50 text-yellow-800 text-xs px-3 py-2 rounded-lg font-medium border border-yellow-200">
@@ -230,7 +222,6 @@ const PaymentChat = () => {
                         )}
 
                         <div className="flex gap-2 items-center">
-                            {/* Allow attachment button always, so they can swap images during edit! */}
                             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => setSelectedFile(e.target.files[0])} />
                             <button type="button" onClick={() => fileInputRef.current?.click()} className="p-3.5 rounded-xl border bg-white text-gray-500 hover:bg-gray-50 hover:text-indigo-600 transition-colors shadow-sm text-lg">
                                 📎
