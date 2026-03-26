@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from 'react'
+import { React, useState, useEffect } from 'react'
 import { useLogoutUserMutation } from '../../redux/features/auth/authApi';
 import { useDispatch } from 'react-redux';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
@@ -19,9 +19,16 @@ const AdminDashboard = () => {
                 const msgs = event.data.messages;
                 const lastMsg = msgs[msgs.length - 1];
 
-                // If the user sent the last message, increase the red dot count!
+                // If the user sent the message, increase count AND ring the bell!
                 if (lastMsg && lastMsg.sender === 'user') {
                     setUnreadChatCount(prev => prev + 1);
+
+                    // Ring the notification bell
+                    try {
+                        const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                        // .catch prevents crashes if Chrome blocks the audio
+                        audio.play().catch(e => console.log('Browser blocked audio. Click the screen once to allow.'));
+                    } catch (error) { }
                 }
             }
         };
@@ -100,7 +107,7 @@ const AdminDashboard = () => {
                         <NavLink
                             to="/dashboard/chats"
                             className={navItemStyle}
-                            onClick={() => setUnreadChatCount(0)} // Clears the badge when admin clicks the tab
+                            onClick={() => setUnreadChatCount(0)} // Clears the red badge when you click to view chats
                         >
                             <div className="flex items-center gap-3">
                                 <MessageSquare size={18} strokeWidth={1.8} />
@@ -109,8 +116,8 @@ const AdminDashboard = () => {
 
                             {/* RED NOTIFICATION BADGE */}
                             {unreadChatCount > 0 && (
-                                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.7)] ml-2">
-                                    {unreadChatCount}
+                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-md">
+                                    {unreadChatCount} New
                                 </span>
                             )}
                         </NavLink>
