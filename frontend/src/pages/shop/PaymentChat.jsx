@@ -7,25 +7,35 @@ const PaymentChat = () => {
     const amount = location.state?.amount || 0;
     const orderId = location.state?.orderId || "c1";
 
-    // ✅ FORCE LOCAL STORAGE SO ADMIN TAB CAN READ IT
     const storageKey = `chat_${orderId}_messages`;
     const statusKey = `chat_${orderId}_status`;
     const channel = new BroadcastChannel('payment_sync');
 
-    const messagesEndRef = useRef(null);
+    // ✅ Replaced the buggy scrollIntoView with a strict container ref
+    const chatContainerRef = useRef(null);
     const fileInputRef = useRef(null);
+
+    const initialAdminMessage = {
+        id: 1,
+        sender: 'admin',
+        text: `Hello! Please complete your payment of $${amount.toFixed(2)} using:\n• Easypaisa: 03XXXXXXXXX\n• Bank Transfer: XXXX-XXXX-XXXX-XXXX\n\nAfter sending, please upload your receipt here.`
+    };
 
     const [messages, setMessages] = useState(() => {
         const saved = localStorage.getItem(storageKey);
-        return saved ? JSON.parse(saved) : [
-            { id: 1, sender: 'admin', text: `Hello! Please complete your payment of $${amount.toFixed(2)} using:\n• Easypaisa: 03XXXXXXXXX\n• Bank Transfer: XXXX-XXXX-XXXX-XXXX\n\nAfter sending, please upload your receipt here.` }
-        ];
+        return saved ? JSON.parse(saved) : [initialAdminMessage];
     });
 
     const [status, setStatus] = useState(() => localStorage.getItem(statusKey) || 'Pending');
     const [inputText, setInputText] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
+    // States for Editing
+    const [editingMessageId, setEditingMessageId] = useState(null);
+    const [existingImageUrl, setExistingImageUrl] = useState(null);
+
+    // ✅ Sync with Admin Tab updates
     useEffect(() => {
         channel.onmessage = (event) => {
             if (event.data?.messages && event.data?.orderId === orderId) {
@@ -38,58 +48,115 @@ const PaymentChat = () => {
         return () => channel.close();
     }, [orderId, storageKey, statusKey]);
 
+    // ✅ THE SCROLL FIX: Only scroll the chat div, never the whole page!
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
     }, [messages]);
 
-    const handleSend = () => {
+    // Generate Image Preview URL instantly when user selects a new file
+    useEffect(() => {
         if (!selectedFile) return;
+        const url = URL.createObjectURL(selectedFile);
+        setPreviewUrl(url);
+        return () => URL.revokeObjectURL(url);
+    }, [selectedFile]);
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const userMsg = {
-                id: Date.now(),
-                sender: 'user',
-                text: inputText.trim() || "Sent a receipt",
-                imageUrl: reader.result
-            };
-
-            const updatedWithUser = [...messages, userMsg];
-            setMessages(updatedWithUser);
-            localStorage.setItem(storageKey, JSON.stringify(updatedWithUser));
-
-            // ✅ Send Broadcast to Admin Tab!
-            channel.postMessage({
-                orderId: orderId,
-                messages: updatedWithUser,
-                status: status
-            });
-
-            setSelectedFile(null);
-            setInputText('');
-
-            // Admin Auto-Reply
-            setTimeout(() => {
-                const autoAdminMsg = {
-                    id: Date.now() + 1,
-                    sender: 'admin',
-                    text: "Receipt received! Your payment is under verification. Chat is disabled until admin review."
-                };
-                const finalMessages = [...updatedWithUser, autoAdminMsg];
-                setMessages(finalMessages);
-                localStorage.setItem(storageKey, JSON.stringify(finalMessages));
-
-                channel.postMessage({
-                    orderId: orderId,
-                    messages: finalMessages,
-                    status: status
-                });
-            }, 500);
-        };
-        reader.readAsDataURL(selectedFile);
+    const syncAndBroadcast = (updatedMessages) => {
+        setMessages(updatedMessages);
+        localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
+        channel.postMessage({
+            orderId: orderId,
+            messages: updatedMessages,
+            status: status
+        });
     };
 
-    const isLocked = status !== 'Pending' || messages.some(m => m.imageUrl);
+    // ✅ Handle Sending (Text/Image) OR Updating an existing message (Text/Image)
+    const handleSendOrUpdate = (e) => {
+        e.preventDefault();
+        if (!inputText.trim() && !selectedFile && !previewUrl) return;
+
+        // --- UPDATE EXISTING MESSAGE ---
+        if (editingMessageId) {
+            if (selectedFile) {
+                // User attached a NEW image during edit
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const updated = messages.map(m =>
+                        m.id === editingMessageId ? { ...m, text: inputText.trim(), imageUrl: reader.result } : m
+                    );
+                    syncAndBroadcast(updated);
+                    cancelEdit();
+                };
+                reader.readAsDataURL(selectedFile);
+                return;
+            } else {
+                // User just edited text, or deleted the image without adding a new one
+                const finalImageUrl = previewUrl ? existingImageUrl : null; // If previewUrl is null, they clicked 'X'
+
+                const updated = messages.map(m =>
+                    m.id === editingMessageId ? { ...m, text: inputText.trim(), imageUrl: finalImageUrl } : m
+                );
+                syncAndBroadcast(updated);
+                cancelEdit();
+                return;
+            }
+        }
+
+        // --- SEND NEW MESSAGE ---
+        if (selectedFile) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const userMsg = { id: Date.now(), sender: 'user', text: inputText.trim(), imageUrl: reader.result };
+                syncAndBroadcast([...messages, userMsg]);
+                setSelectedFile(null);
+                setPreviewUrl(null);
+                setInputText('');
+            };
+            reader.readAsDataURL(selectedFile);
+        } else {
+            const userMsg = { id: Date.now(), sender: 'user', text: inputText.trim() };
+            syncAndBroadcast([...messages, userMsg]);
+            setInputText('');
+        }
+    };
+
+    // ✅ WhatsApp Style Edit/Delete/Clear Features
+    const handleDelete = (id) => {
+        const updated = messages.filter(m => m.id !== id);
+        syncAndBroadcast(updated);
+    };
+
+    const handleEdit = (msg) => {
+        setEditingMessageId(msg.id);
+        setInputText(msg.text || '');
+
+        // If the message has an image, load it into the preview box!
+        if (msg.imageUrl) {
+            setPreviewUrl(msg.imageUrl);
+            setExistingImageUrl(msg.imageUrl);
+        } else {
+            setPreviewUrl(null);
+            setExistingImageUrl(null);
+        }
+        setSelectedFile(null);
+    };
+
+    const handleClearChat = () => {
+        if (window.confirm("Are you sure you want to clear this chat?")) {
+            syncAndBroadcast([initialAdminMessage]);
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingMessageId(null);
+        setInputText('');
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        setExistingImageUrl(null);
+    };
 
     return (
         <section className="min-h-screen py-10 px-4 bg-white font-sans">
@@ -101,29 +168,90 @@ const PaymentChat = () => {
                     )}
                 </div>
 
-                <div className="bg-gray-50 p-6 rounded-2xl shadow-md border border-gray-100">
-                    <div className="flex justify-between items-center mb-4 border-b pb-2">
-                        <h2 className="text-lg font-extrabold uppercase text-gray-900">Payment Chat</h2>
-                        <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">{status}</span>
+                <div className="bg-gray-50 p-6 rounded-2xl shadow-md border border-gray-100 flex flex-col h-[80vh]">
+                    <div className="flex justify-between items-center mb-4 border-b pb-3">
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-lg font-extrabold uppercase text-gray-900">Payment Chat</h2>
+                            <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">{status}</span>
+                        </div>
+                        <button onClick={handleClearChat} className="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
+                            🧹 Clear Chat
+                        </button>
                     </div>
 
-                    <div className="h-96 overflow-y-auto mb-4 space-y-3 pr-1">
+                    {/* ✅ ATTACHED THE STRICT SCROLL REF HERE */}
+                    <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2">
                         {messages.map((msg) => (
                             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[75%] p-3 rounded-xl text-sm ${msg.sender === 'admin' ? 'bg-white border text-gray-700' : 'bg-indigo-600 text-white'}`}>
-                                    {msg.imageUrl && <img src={msg.imageUrl} alt="Receipt" className="max-w-[200px] rounded-lg mb-2" />}
-                                    <p className="whitespace-pre-line">{msg.text}</p>
+                                <div className={`max-w-[75%] flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'} group`}>
+
+                                    <div className={`p-3 rounded-xl text-sm shadow-sm ${msg.sender === 'admin' ? 'bg-white border text-gray-700' : 'bg-indigo-600 text-white'}`}>
+                                        {msg.imageUrl && (
+                                            <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer">
+                                                <img src={msg.imageUrl} alt="Receipt" className="max-w-[200px] rounded-lg mb-2 cursor-pointer hover:opacity-90 transition-opacity" />
+                                            </a>
+                                        )}
+                                        {msg.text && <p className="whitespace-pre-line">{msg.text}</p>}
+                                    </div>
+
+                                    {/* Edit/Delete Actions */}
+                                    {msg.sender === 'user' && (
+                                        <div className="flex gap-3 mt-1 text-[10px] font-bold text-gray-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity px-1">
+                                            <button onClick={() => handleEdit(msg)} className="hover:text-indigo-600">✏️ Edit</button>
+                                            <button onClick={() => handleDelete(msg.id)} className="hover:text-red-500">🗑️ Delete</button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
-                        <div ref={messagesEndRef} />
                     </div>
 
-                    <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-2 items-center">
-                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => setSelectedFile(e.target.files[0])} disabled={isLocked} />
-                        <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isLocked} className={`p-3 rounded-lg border ${isLocked ? 'bg-gray-200 text-gray-400' : 'bg-white text-gray-500'}`}>📎</button>
-                        <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} disabled={isLocked} placeholder={isLocked ? "Chat Locked - Awaiting Review" : "Type a message..."} className="w-full border p-3 rounded-lg text-sm outline-none" />
-                        <button type="submit" disabled={isLocked || !selectedFile} className={`py-3 px-5 rounded-xl font-bold text-sm uppercase ${isLocked || !selectedFile ? 'bg-gray-300' : 'bg-indigo-600 text-white'}`}>Send</button>
+                    {/* PREVIEW AREA */}
+                    {previewUrl && (
+                        <div className="mb-3 relative inline-block border-2 border-dashed border-indigo-300 p-2 rounded-xl bg-indigo-50">
+                            <img src={previewUrl} alt="Preview" className="h-24 object-contain rounded-lg shadow-sm" />
+                            <button
+                                type="button"
+                                onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
+                                className="absolute -top-3 -right-3 bg-red-500 text-white w-6 h-6 flex items-center justify-center rounded-full shadow-md font-bold text-xs hover:bg-red-600"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    )}
+
+                    {/* INPUT FORM */}
+                    <form onSubmit={handleSendOrUpdate} className="flex flex-col gap-2">
+                        {editingMessageId && (
+                            <div className="flex justify-between items-center bg-yellow-50 text-yellow-800 text-xs px-3 py-2 rounded-lg font-medium border border-yellow-200">
+                                <span>Editing message...</span>
+                                <button type="button" onClick={cancelEdit} className="text-red-500 font-bold hover:underline">Cancel</button>
+                            </div>
+                        )}
+
+                        <div className="flex gap-2 items-center">
+                            {/* Allow attachment button always, so they can swap images during edit! */}
+                            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => setSelectedFile(e.target.files[0])} />
+                            <button type="button" onClick={() => fileInputRef.current?.click()} className="p-3.5 rounded-xl border bg-white text-gray-500 hover:bg-gray-50 hover:text-indigo-600 transition-colors shadow-sm text-lg">
+                                📎
+                            </button>
+
+                            <input
+                                type="text"
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                placeholder={editingMessageId ? "Edit your message..." : "Type a message..."}
+                                className="w-full border p-3.5 rounded-xl text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all shadow-sm"
+                            />
+
+                            <button
+                                type="submit"
+                                disabled={!inputText.trim() && !selectedFile && !previewUrl}
+                                className={`py-3.5 px-6 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-sm ${!inputText.trim() && !selectedFile && !previewUrl ? 'bg-gray-200 text-gray-400' : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-md'}`}
+                            >
+                                {editingMessageId ? 'Save' : 'Send'}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
