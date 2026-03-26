@@ -41,7 +41,6 @@ const OrderSchema = new mongoose.Schema(
       },
     ],
 
-    //  Address ko object bana diya taake sari details save hon
     address: {
       firstName: String,
       lastName: String,
@@ -52,7 +51,6 @@ const OrderSchema = new mongoose.Schema(
       country: String,
     },
 
-    //  Phone number ke liye alag field
     phone: {
       type: String,
       required: true,
@@ -65,7 +63,12 @@ const OrderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["Cash on Delivery", "Online Payment", "Manual Payment"], // Option barha diya
+      // ✅ Yahan exact wohi string add kar di hai jo frontend se aa rahi hai
+      enum: [
+        "Cash on Delivery", 
+        "Online Payment", 
+        "Manual Payment (EasyPaisa/JazzCash/Bank)"
+      ], 
       default: "Cash on Delivery",
     },
 
