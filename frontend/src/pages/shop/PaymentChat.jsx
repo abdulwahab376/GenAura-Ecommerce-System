@@ -5,8 +5,9 @@ const PaymentChat = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const amount = location.state?.amount || 0;
-    const orderId = location.state?.orderId || "c1"; 
+    const orderId = location.state?.orderId || "c1";
 
+    // ✅ FORCE LOCAL STORAGE SO ADMIN TAB CAN READ IT
     const storageKey = `chat_${orderId}_messages`;
     const statusKey = `chat_${orderId}_status`;
     const channel = new BroadcastChannel('payment_sync');
@@ -15,28 +16,27 @@ const PaymentChat = () => {
     const fileInputRef = useRef(null);
 
     const [messages, setMessages] = useState(() => {
-        const saved = sessionStorage.getItem(storageKey);
+        const saved = localStorage.getItem(storageKey);
         return saved ? JSON.parse(saved) : [
             { id: 1, sender: 'admin', text: `Hello! Please complete your payment of $${amount.toFixed(2)} using:\n• Easypaisa: 03XXXXXXXXX\n• Bank Transfer: XXXX-XXXX-XXXX-XXXX\n\nAfter sending, please upload your receipt here.` }
         ];
     });
 
-    const [status, setStatus] = useState(() => sessionStorage.getItem(statusKey) || 'Pending');
+    const [status, setStatus] = useState(() => localStorage.getItem(statusKey) || 'Pending');
     const [inputText, setInputText] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
 
-    //  FIXED: Now listens for the actual data payload from the Admin tab
     useEffect(() => {
         channel.onmessage = (event) => {
-            if (event.data?.messages) {
+            if (event.data?.messages && event.data?.orderId === orderId) {
                 setMessages(event.data.messages);
                 setStatus(event.data.status);
-                sessionStorage.setItem(storageKey, JSON.stringify(event.data.messages));
-                sessionStorage.setItem(statusKey, event.data.status);
+                localStorage.setItem(storageKey, JSON.stringify(event.data.messages));
+                localStorage.setItem(statusKey, event.data.status);
             }
         };
         return () => channel.close();
-    }, [storageKey, statusKey]);
+    }, [orderId, storageKey, statusKey]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -51,24 +51,40 @@ const PaymentChat = () => {
                 id: Date.now(),
                 sender: 'user',
                 text: inputText.trim() || "Sent a receipt",
-                imageUrl: reader.result // Base64 image
+                imageUrl: reader.result
             };
 
-            const autoAdminMsg = {
-                id: Date.now() + 1,
-                sender: 'admin',
-                text: "Receipt received! Your payment is under verification. Chat is disabled until admin review."
-            };
+            const updatedWithUser = [...messages, userMsg];
+            setMessages(updatedWithUser);
+            localStorage.setItem(storageKey, JSON.stringify(updatedWithUser));
 
-            const updated = [...messages, userMsg, autoAdminMsg];
-            setMessages(updated);
-            sessionStorage.setItem(storageKey, JSON.stringify(updated));
-            
-            //  FIXED: Sending the actual data across the tabs
-            channel.postMessage({ messages: updated, status: status });
-            
+            // ✅ Send Broadcast to Admin Tab!
+            channel.postMessage({
+                orderId: orderId,
+                messages: updatedWithUser,
+                status: status
+            });
+
             setSelectedFile(null);
             setInputText('');
+
+            // Admin Auto-Reply
+            setTimeout(() => {
+                const autoAdminMsg = {
+                    id: Date.now() + 1,
+                    sender: 'admin',
+                    text: "Receipt received! Your payment is under verification. Chat is disabled until admin review."
+                };
+                const finalMessages = [...updatedWithUser, autoAdminMsg];
+                setMessages(finalMessages);
+                localStorage.setItem(storageKey, JSON.stringify(finalMessages));
+
+                channel.postMessage({
+                    orderId: orderId,
+                    messages: finalMessages,
+                    status: status
+                });
+            }, 500);
         };
         reader.readAsDataURL(selectedFile);
     };

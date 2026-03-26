@@ -5,7 +5,6 @@ const generateToken = require('../middleware/generateToken');
 const verifyToken = require('../middleware/verifyToken');
 require('dotenv').config()
 
-
 // Register endpoint
 router.post('/register', async (req, res) => {
     try {
@@ -15,6 +14,12 @@ router.post('/register', async (req, res) => {
         res.status(201).send({ message: 'User registered successfully' });
     } catch (error) {
         console.error('Error registering user:', error);
+
+        // ✅ THE FIX: Catch the MongoDB Duplicate Key Error!
+        if (error.code === 11000) {
+            return res.status(400).send({ message: 'Email is already registered. Please use a different email or log in.' });
+        }
+
         res.status(500).send({ message: 'Registration failed' });
     }
 });
@@ -22,10 +27,8 @@ router.post('/register', async (req, res) => {
 // Login endpoint
 router.post('/login', async (req, res) => {
     try {
-        // console.log(req.body)
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        // console.log(user._id)
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
@@ -34,7 +37,6 @@ router.post('/login', async (req, res) => {
             return res.status(401).send({ message: 'Invalid credentials' });
         }
 
-
         const token = await generateToken(user._id);
 
         res.cookie('token', token, {
@@ -42,8 +44,12 @@ router.post('/login', async (req, res) => {
             secure: true, // Ensure this is true for HTTPS
             sameSite: 'None'
         });
+
+        // IMPORTANT: We cannot send two responses, so I combined this into one clean send!
         res.status(200).send({
-            message: 'Logged in successfully', token, user: {
+            message: 'Logged in successfully',
+            token,
+            user: {
                 _id: user._id,
                 email: user.email,
                 username: user.username,
@@ -67,7 +73,6 @@ router.post('/logout', (req, res) => {
 
 
 // all users 
-
 router.get('/users', async (req, res) => {
     try {
         const users = await User.find({}, 'id email role').sort({ createdAt: -1 });
@@ -153,6 +158,7 @@ router.patch('/edit-profile', async (req, res) => {
         res.status(500).send({ message: 'Profile update failed' });
     }
 });
+
 router.get('/create-admin-manual', async (req, res) => {
     try {
         const User = require('./user.model'); // Ensure model is imported

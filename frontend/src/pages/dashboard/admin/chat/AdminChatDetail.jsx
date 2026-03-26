@@ -16,17 +16,22 @@ const AdminChatDetail = () => {
   const statusKey = `chat_${id}_status`;
   const channel = new BroadcastChannel('payment_sync');
 
-  const [messages, setMessages] = useState(() => JSON.parse(sessionStorage.getItem(storageKey) || '[]'));
-  const [status, setStatus] = useState(() => sessionStorage.getItem(statusKey) || 'Pending');
+  const [messages, setMessages] = useState(() => JSON.parse(localStorage.getItem(storageKey) || '[]'));
+  const [status, setStatus] = useState(() => localStorage.getItem(statusKey) || 'Pending');
   const [inputText, setInputText] = useState('');
+
+  // ✅ Notify the sidebar that we opened this chat so it clears the red badge
+  useEffect(() => {
+    channel.postMessage({ action: 'chat_opened' });
+  }, []);
 
   useEffect(() => {
     channel.onmessage = (event) => {
       if (event.data?.messages) {
         setMessages(event.data.messages);
         setStatus(event.data.status);
-        sessionStorage.setItem(storageKey, JSON.stringify(event.data.messages));
-        sessionStorage.setItem(statusKey, event.data.status);
+        localStorage.setItem(storageKey, JSON.stringify(event.data.messages));
+        localStorage.setItem(statusKey, event.data.status);
       }
     };
     return () => channel.close();
@@ -37,8 +42,8 @@ const AdminChatDetail = () => {
   }, [messages]);
 
   const syncToStorageAndBroadcast = (updatedMessages, newStatus = status) => {
-    sessionStorage.setItem(storageKey, JSON.stringify(updatedMessages));
-    sessionStorage.setItem(statusKey, newStatus);
+    localStorage.setItem(storageKey, JSON.stringify(updatedMessages));
+    localStorage.setItem(statusKey, newStatus);
     channel.postMessage({ messages: updatedMessages, status: newStatus });
   };
 
@@ -61,13 +66,13 @@ const AdminChatDetail = () => {
   };
 
   const handleAction = async (newStatus) => {
-    const text = newStatus === 'Approved' 
-      ? ' Payment has been approved. Your order is now processing.' 
+    const text = newStatus === 'Approved'
+      ? '✅ Payment has been approved. Your order is now processing.'
       : '❌ Payment has been rejected. Please contact support for more details.';
-      
+
     const newMsg = { id: Date.now(), sender: 'admin', text };
     const updatedMsgs = [...messages, newMsg];
-    
+
     setMessages(updatedMsgs);
     setStatus(newStatus);
     syncToStorageAndBroadcast(updatedMsgs, newStatus);
@@ -107,11 +112,10 @@ const AdminChatDetail = () => {
           <div className="flex-1 overflow-y-auto p-5 space-y-3">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] p-3 rounded-xl text-sm ${
-                  msg.sender === 'user'
+                <div className={`max-w-[75%] p-3 rounded-xl text-sm ${msg.sender === 'user'
                     ? 'bg-gray-100 text-gray-700 border border-gray-200'
                     : 'bg-[#5B4FD9] text-white'
-                }`}>
+                  }`}>
                   {msg.imageUrl && (
                     <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer">
                       <img src={msg.imageUrl} alt="Receipt" className="max-w-[220px] rounded-lg mb-2 border border-white/20 cursor-pointer hover:opacity-90" />
@@ -190,9 +194,8 @@ const AdminChatDetail = () => {
             )}
 
             {status !== 'Pending' && (
-              <div className={`mt-6 p-3 rounded-lg text-center text-xs font-bold uppercase tracking-wider ${
-                status === 'Approved' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
-              }`}>
+              <div className={`mt-6 p-3 rounded-lg text-center text-xs font-bold uppercase tracking-wider ${status === 'Approved' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
+                }`}>
                 Payment {status}
               </div>
             )}
