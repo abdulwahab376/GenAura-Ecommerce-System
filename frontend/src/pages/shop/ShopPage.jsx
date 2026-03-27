@@ -131,10 +131,10 @@ import { useFetchAllProductsQuery } from '../../redux/features/products/products
 const filters = {
     categories: {
         men: ['pants', 'shirts', 'shoes', 'watches', 'jackets'],
-        women: ['dress', 'jewelry', 'cosmetics', 'shirts', 'handbags', 'jackets'],
+        women: ['dress', 'jewellery', 'cosmetics', 'shirts', 'handbags', 'jackets'],
         kids: ['kids suits', 't-shirts', 'shoes', 'pants', 'jackets']
     },
-    colors: ['all', 'black', 'red', 'gold', 'blue', 'silver', 'beige', 'green', 'purple', 'orange', 'white'],
+    colors: ['all', 'black', 'red', 'gold', 'blue', 'silver', 'beige', 'green', 'purple', 'orange', 'white', 'pink', 'gray', 'brown'],
     priceRanges: [
         { label: 'under-1000', min: 0, max: 1000 },
         { label: '1000-2000', min: 1000, max: 2000 },

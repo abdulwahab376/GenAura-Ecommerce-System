@@ -216,7 +216,7 @@ import { useFetchProductByIdQuery, useUpdateProductMutation } from '../../../../
 const categoryData = {
     men: ['shirts', 'pants', 'watches', 'shoes', 'jackets'],
     women: ['dress', 'jewellery', 'cosmetics', 'handbags', 'shirts','jackets'],
-    kids: ['kids suit', 't-shirts', 'shoes', 'pants', 'jackets']
+    kids: ['kids suits', 't-shirts', 'shoes', 'pants', 'jackets']
 };
 
 const sizeOptionsData = {
@@ -239,6 +239,9 @@ const colorOptions = [
     { value: 'gold', label: 'Gold' }, { value: 'silver', label: 'Silver' },
     { value: 'green', label: 'Green' }, { value: 'beige', label: 'Beige' }, 
     { value: 'purple', label: 'Purple' }, { value: 'orange', label: 'Orange' },
+    { value: 'pink', label: 'Pink' }, { value: 'gray', label: 'Gray' },
+    { value: 'brown', label: 'Brown' }
+
 ];
 
 const UpdateProduct = () => {

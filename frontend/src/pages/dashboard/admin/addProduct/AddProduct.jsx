@@ -270,7 +270,11 @@ const colorOptions = [
     { value: 'silver', label: 'Silver' },
     { value: 'green', label: 'Green' },
     { value: 'purple', label: 'Purple' },
-    { value: 'orange', label: 'Orange' }
+    { value: 'orange', label: 'Orange' },
+    { value: 'beige', label: 'Beige' },
+    { value: 'pink', label: 'Pink' },
+    { value: 'gray', label: 'Gray' },
+    { value: 'brown', label: 'Brown' },
 ];
 
 const AddProduct = () => {
