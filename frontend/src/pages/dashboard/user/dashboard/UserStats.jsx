@@ -44,7 +44,10 @@ const UserStats = ({ stats }) => {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Total Payments</p>
-            <h2 className="text-2xl font-bold text-gray-800">${stats.totalPayments || 0}</h2>
+            {/* ✅ Fixed: No extra zeros and added commas using toLocaleString */}
+            <h2 className="text-2xl font-bold text-gray-800">
+                Rs. {Number(stats.totalPayments || 0).toLocaleString('en-IN')}
+            </h2>
           </div>
         </div>
 
