@@ -195,33 +195,40 @@ const Navbar = () => {
   // ✅ Admin Notification State
   const [totalUnread, setTotalUnread] = useState(0);
 
+// ✅ Updated Admin Notification Logic (Navbar.jsx)
 const calculateAdminNotifications = () => {
     if (user?.role !== 'admin') return;
 
-    let count = 0;
+    let unreadChatsCount = 0; // Hum orders/chats gineinge, messages nahi
+
     Object.keys(localStorage).forEach(key => {
       // Sirf valid chat keys pakrein
       if (key.startsWith('chat_') && key.endsWith('_messages')) {
         const orderId = key.replace('chat_', '').replace('_messages', '');
         
         const rawMsgs = localStorage.getItem(key);
-        if (!rawMsgs) return; // Agar data hi nahi hai to skip
+        if (!rawMsgs) return;
 
-        const msgs = JSON.parse(rawMsgs);
-        
-        // Check: Agar messages array khali nahi hai
-        if (Array.isArray(msgs) && msgs.length > 0) {
-          const lastRead = parseInt(localStorage.getItem(`chat_read_count_${orderId}`) || '0');
+        try {
+          const msgs = JSON.parse(rawMsgs);
           
-          // Sirf tab count karein jab naye messages hon aur aakhri bhejny wala user ho
-          if (msgs.length > lastRead && msgs[msgs.length - 1]?.sender === 'user') {
-            count += (msgs.length - lastRead);
+          if (Array.isArray(msgs) && msgs.length > 0) {
+            const lastRead = parseInt(localStorage.getItem(`chat_read_count_${orderId}`) || '0');
+            
+            // ✅ FIX: Sirf ye check karein ke kya is chat mein koi naya message hai
+            // Aur kya aakhri message user ne bheja hai
+            if (msgs.length > lastRead && msgs[msgs.length - 1]?.sender === 'user') {
+              unreadChatsCount += 1; // Har unread chat ko 1 hi ginein
+            }
           }
+        } catch (e) {
+          console.error("Error parsing chat data", e);
         }
       }
     });
-    setTotalUnread(count);
-  };
+    
+    setTotalUnread(unreadChatsCount);
+};
 
   useEffect(() => {
     calculateAdminNotifications();

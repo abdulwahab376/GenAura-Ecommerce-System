@@ -197,7 +197,6 @@ const AdminChats = () => {
             if (event.data?.messages && event.data?.orderId) {
                 localStorage.setItem(`chat_${event.data.orderId}_messages`, JSON.stringify(event.data.messages));
                 localStorage.setItem(`chat_${event.data.orderId}_status`, event.data.status);
-                // Force tick to refresh list
                 setTick(t => t + 1);
             }
         };
@@ -213,14 +212,17 @@ const AdminChats = () => {
                 const savedStatus = localStorage.getItem(`chat_${order._id}_status`);
                 const msgs = JSON.parse(localStorage.getItem(`chat_${order._id}_messages`) || '[]');
                 
-                // ✅ LOGIC UPDATE: Compare total messages with "last_read_count"
                 const lastReadCount = parseInt(localStorage.getItem(`chat_read_count_${order._id}`) || '0');
-                const totalMessages = msgs.length;
-                const lastMsg = msgs[totalMessages - 1];
-
-                // Unread tabhi hoga agar naye messages aye hon aur last message USER ka ho
-                const hasUnread = totalMessages > lastReadCount && lastMsg?.sender === 'user';
-                const unreadCount = hasUnread ? (totalMessages - lastReadCount) : 0;
+                
+                // ✅ Simple & Accurate Logic:
+                // Sirf wo messages ginein jo lastRead ke BAAD aye hain
+                const newMessages = msgs.slice(lastReadCount);
+                
+                // Unread tabhi kahlayenge agar naye messages mein USER ka message mojood ho
+                // Hum sirf USER ke messages count karenge jo admin ne abhi nahi dekhe
+                const unreadUserMsgs = newMessages.filter(m => m.sender === 'user').length;
+                
+                const hasUnread = unreadUserMsgs > 0;
 
                 return {
                     id: order._id,
@@ -228,19 +230,19 @@ const AdminChats = () => {
                     amount: order.amount || order.totalAmount,
                     status: savedStatus || order.status,
                     hasUnread: hasUnread,
-                    unreadCount: unreadCount
+                    unreadCount: unreadUserMsgs
                 };
             });
 
-            // Sort: Unread messages always at top
+            // Sort: Unread messages hamesha upar rahein
             updated.sort((a, b) => (b.hasUnread ? 1 : 0) - (a.hasUnread ? 1 : 0));
             setChatList(updated);
         }
     }, [orders, tick]);
 
     const handleViewChat = (id) => {
-        // ✅ Mark as read by saving the CURRENT total message count
         const msgs = JSON.parse(localStorage.getItem(`chat_${id}_messages`) || '[]');
+        // Mark as read: Save total current messages count
         localStorage.setItem(`chat_read_count_${id}`, msgs.length.toString());
         
         setTick(t => t + 1);
