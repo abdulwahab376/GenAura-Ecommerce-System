@@ -114,15 +114,18 @@ const UserDashboard = () => {
         }
     };
 
-    const userNavItems = [
-        { path: '/dashboard', label: 'Dashboard', icon: 'ri-layout-line' },
-        { path: '/dashboard/orders', label: 'My Orders', icon: 'ri-shopping-bag-line' },
-        { path: '/dashboard/payments', label: 'Payments', icon: 'ri-bank-card-line' },
-        // ✅ Naya Section: Payment Support (User Chat)
-        { path: '/dashboard/chats', label: 'Payment Support', icon: 'ri-chat-smile-3-line' },
-        { path: '/dashboard/profile', label: 'Profile Settings', icon: 'ri-user-settings-line' },
-        { path: '/dashboard/reviews', label: 'My Reviews', icon: 'ri-star-line' },
-    ];
+   const userNavItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: 'ri-layout-line' },
+    { path: '/dashboard/orders', label: 'My Orders', icon: 'ri-shopping-bag-line' },
+    { path: '/dashboard/payments', label: 'Payments', icon: 'ri-bank-card-line' },
+    
+    // ❌ Ghalat path: { path: '/dashboard/chats', label: 'Payment Support', ... }
+    // ✅ Sahi path jo humne naya banaya hai:
+    { path: '/dashboard/payment-support', label: 'Payment Support', icon: 'ri-chat-smile-3-line' },
+    
+    { path: '/dashboard/profile', label: 'Profile Settings', icon: 'ri-user-settings-line' },
+    { path: '/dashboard/reviews', label: 'My Reviews', icon: 'ri-star-line' },
+];
 
     return (
         <div className="space-y-5 bg-white p-6 md:h-screen flex flex-col justify-between shadow-lg border-r border-gray-100">

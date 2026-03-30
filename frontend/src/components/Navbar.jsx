@@ -271,6 +271,7 @@ const calculateAdminNotifications = () => {
     { label: "Profile", path: "/dashboard/profile" }, 
     { label: "Payments", path: "/dashboard/payments" },
     { label: "Orders", path: "/dashboard/orders" },
+    { label: "Payment Support", path: "/dashboard/payment-support" },
   ];
 
   const dropdownMenus = user?.role === 'admin' ? adminDropdownMenus : userDropdownMenus;
