@@ -479,10 +479,10 @@ const OrderDetails = () => {
   };
 
   // 2. DYNAMIC LOCATION LOGIC
-  const warehouseCoords = [32.9405, 73.7276]; // Jhelum Warehouse
+  const warehouseCoords = [32.9405, 73.7276]; 
   const destinationCity = order?.address?.city || "Customer Location";
   const cityKey = destinationCity.toLowerCase().trim();
-  const destinationCoords = cityCoordsMap[cityKey] || [31.5204, 74.3587]; // Default Lahore
+  const destinationCoords = cityCoordsMap[cityKey] || [31.5204, 74.3587]; 
   const isLocalDelivery = cityKey === "jhelum";
 
   // 3. STATUS HANDLING
@@ -500,7 +500,7 @@ const OrderDetails = () => {
     }
   }, [order?.status, isRejected]);
 
-  // 4. SMART TRACKING DATA
+  // 4. SMART TRACKING DATA (Estimate & Movement Fix)
   const trackingData = useMemo(() => {
     if (isRejected) {
       return { location: 'Order Cancelled', status: 'Rejected', estimate: 'N/A', progress: 0 };
@@ -508,24 +508,24 @@ const OrderDetails = () => {
 
     if (isLocalDelivery) {
       const local = {
-        1: { location: 'Warehouse - Jhelum', status: 'Packing', estimate: 'Within 2 Hours', progress: 10 },
-        2: { location: 'Sorting Center - Jhelum', status: 'Processing', estimate: 'Today', progress: 45 },
-        3: { location: 'Out for Delivery', status: 'Shipped', estimate: 'Arriving Soon', progress: 85 },
+        1: { location: 'Warehouse - Jhelum', status: 'Awaiting Pack', estimate: 'Within 24 Hours', progress: 3 },
+        2: { location: 'Warehouse (Packing)', status: 'Processing', estimate: 'Arriving Today', progress: 15 },
+        3: { location: 'Out for Delivery (Jhelum)', status: 'Shipped', estimate: 'Within 1 Hour', progress: 85 },
         4: { location: destinationCity, status: 'Delivered', estimate: 'Delivered', progress: 100 },
       };
       return local[currentStep] || local[1];
     }
 
     const outstation = {
-      1: { location: 'Warehouse - Jhelum', status: 'Packing', estimate: '1 Day', progress: 5 },
-      2: { location: 'Gujrat Transit Hub', status: 'Processing', estimate: '2 Days', progress: 35 },
-      3: { location: 'In Transit to ' + destinationCity, status: 'Shipped', estimate: 'Tomorrow', progress: 70 },
+      1: { location: 'Warehouse - Jhelum', status: 'Pending', estimate: '2-3 Days', progress: 3 },
+      2: { location: 'Warehouse (Loading)', status: 'Processing', estimate: '1-2 Days', progress: 15 },
+      3: { location: 'In Transit (GT Road)', status: 'Shipped', estimate: 'Tomorrow', progress: 65 },
       4: { location: destinationCity, status: 'Delivered', estimate: 'Delivered', progress: 100 },
     };
     return outstation[currentStep] || outstation[1];
   }, [currentStep, destinationCity, isLocalDelivery, isRejected]);
 
-  // TRUCK POSITION MATH
+  // 5. TRUCK POSITION MATH
   const currentTruckCoords = [
     warehouseCoords[0] + ((destinationCoords[0] - warehouseCoords[0]) * (trackingData.progress / 100)),
     warehouseCoords[1] + ((destinationCoords[1] - warehouseCoords[1]) * (trackingData.progress / 100))
@@ -545,7 +545,6 @@ const OrderDetails = () => {
     <div className="min-h-screen bg-[#FDFDFD] font-sans pb-20">
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-10">
         
-        {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-3">
@@ -560,7 +559,6 @@ const OrderDetails = () => {
           </button>
         </div>
 
-        {/* TIMELINE SECTION */}
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-8">
           <div className="flex items-center justify-between overflow-x-auto gap-4">
             {isRejected ? (
@@ -592,7 +590,6 @@ const OrderDetails = () => {
           </div>
         </div>
 
-        {/* STATS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {[
             { label: 'Live Location', value: trackingData.location, icon: <MapPin size={18} className="text-blue-500" /> },
@@ -609,7 +606,6 @@ const OrderDetails = () => {
           ))}
         </div>
 
-        {/* PROGRESS BAR */}
         {!isRejected && (
             <div className="mb-10 px-2">
                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-50">
@@ -621,7 +617,6 @@ const OrderDetails = () => {
             </div>
         )}
 
-        {/* MAP SECTION */}
         <div className="bg-white p-3 rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden relative">
           <div className="absolute top-10 left-10 z-[1000] bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white">
              <div className="flex items-center gap-3">
@@ -651,7 +646,6 @@ const OrderDetails = () => {
             </Marker>
           </MapContainer>
         </div>
-
       </main>
     </div>
   );
