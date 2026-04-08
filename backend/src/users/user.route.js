@@ -1,3 +1,191 @@
+// const express = require('express');
+// const router = express.Router();
+// const User = require('./user.model');
+// const generateToken = require('../middleware/generateToken');
+// const verifyToken = require('../middleware/verifyToken');
+// require('dotenv').config()
+
+// // Register endpoint
+// router.post('/register', async (req, res) => {
+//     try {
+//         const { email, password, username } = req.body;
+//         const user = new User({ email, password, username });
+//         await user.save();
+//         res.status(201).send({ message: 'User registered successfully' });
+//     } catch (error) {
+//         console.error('Error registering user:', error);
+
+//         // ✅ THE FIX: Catch the MongoDB Duplicate Key Error!
+//         if (error.code === 11000) {
+//             return res.status(400).send({ message: 'Email is already registered. Please use a different email or log in.' });
+//         }
+
+//         res.status(500).send({ message: 'Registration failed' });
+//     }
+// });
+
+// // Login endpoint
+// router.post('/login', async (req, res) => {
+//     try {
+//         const { email, password } = req.body;
+//         const user = await User.findOne({ email });
+//         if (!user) {
+//             return res.status(404).send({ message: 'User not found' });
+//         }
+//         const isMatch = await user.comparePassword(password);
+//         if (!isMatch) {
+//             return res.status(401).send({ message: 'Invalid credentials' });
+//         }
+
+//         const token = await generateToken(user._id);
+
+//         res.cookie('token', token, {
+//             httpOnly: true,
+//             secure: true, // Ensure this is true for HTTPS
+//             sameSite: 'None'
+//         });
+
+//         // IMPORTANT: We cannot send two responses, so I combined this into one clean send!
+//         res.status(200).send({
+//             message: 'Logged in successfully',
+//             token,
+//             user: {
+//                 _id: user._id,
+//                 email: user.email,
+//                 username: user.username,
+//                 role: user.role,
+//                 profileImage: user.profileImage,
+//                 bio: user.bio,
+//                 profession: user.profession,
+//             }
+//         });
+//     } catch (error) {
+//         console.error('Error logging in:', error);
+//         res.status(500).send({ message: 'Login failed' });
+//     }
+// });
+
+// // Logout endpoint (optional)
+// router.post('/logout', (req, res) => {
+//     res.clearCookie('token');
+//     res.status(200).send({ message: 'Logged out successfully' });
+// });
+
+
+// // all users 
+// router.get('/users', async (req, res) => {
+//     try {
+//         const users = await User.find({}, 'id email role').sort({ createdAt: -1 });
+//         res.status(200).send(users);
+//     } catch (error) {
+//         console.error('Error fetching users:', error);
+//         res.status(500).send({ message: 'Failed to fetch users' });
+//     }
+// });
+
+// // delete a user
+// router.delete('/users/:id', async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const user = await User.findByIdAndDelete(id);
+//         if (!user) {
+//             return res.status(404).send({ message: 'User not found' });
+//         }
+//         res.status(200).send({ message: 'User deleted successfully' });
+//     } catch (error) {
+//         console.error('Error deleting user:', error);
+//         res.status(500).send({ message: 'Failed to delete user' });
+//     }
+// })
+
+// // update a user role
+// router.put('/users/:id', async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { role } = req.body;
+//         const user = await User.findByIdAndUpdate(id, { role }, { new: true });
+//         if (!user) {
+//             return res.status(404).send({ message: 'User not found' });
+//         }
+//         res.status(200).send({ message: 'User role updated successfully', user });
+//     } catch (error) {
+//         console.error('Error updating user role:', error);
+//         res.status(500).send({ message: 'Failed to update user role' });
+//     }
+// });
+
+// // Edit Profile endpoint
+// router.patch('/edit-profile', async (req, res) => {
+//     try {
+//         // Destructure fields from the request body
+//         const { userId, username, profileImage, bio, profession } = req.body;
+
+//         // Check if userId is provided
+//         if (!userId) {
+//             return res.status(400).send({ message: 'User ID is required' });
+//         }
+
+//         // Find user by ID
+//         const user = await User.findById(userId);
+//         if (!user) {
+//             return res.status(404).send({ message: 'User not found' });
+//         }
+
+//         // Update the user's profile with provided fields
+//         if (username !== undefined) user.username = username;
+//         if (profileImage !== undefined) user.profileImage = profileImage;
+//         if (bio !== undefined) user.bio = bio;
+//         if (profession !== undefined) user.profession = profession;
+
+//         // Save the updated user profile
+//         await user.save();
+
+//         // Send the updated user profile as the response
+//         res.status(200).send({
+//             message: 'Profile updated successfully',
+//             user: {
+//                 _id: user._id,
+//                 username: user.username,
+//                 email: user.email,
+//                 profileImage: user.profileImage,
+//                 bio: user.bio,
+//                 profession: user.profession,
+//                 role: user.role,
+//             }
+//         });
+//     } catch (error) {
+//         console.error('Error updating profile:', error);
+//         res.status(500).send({ message: 'Profile update failed' });
+//     }
+// });
+
+// router.get('/create-admin-manual', async (req, res) => {
+//     try {
+//         const User = require('./user.model'); // Ensure model is imported
+//         const existing = await User.findOne({ email: "adminwahab@gmail.com" });
+//         if (existing) return res.send("Admin already exists in DB!");
+
+//         const admin = new User({
+//             username: "Wahab Admin",
+//             email: "adminwahab@gmail.com",
+//             password: "wahabadmin",
+//             role: "admin"
+//         });
+
+//         await admin.save();
+//         res.send("Admin created successfully! Now try logging in at localhost:5173/login");
+//     } catch (err) {
+//         res.status(500).send("Error: " + err.message);
+//     }
+// });
+
+// module.exports = router;
+
+
+
+
+
+
 const express = require('express');
 const router = express.Router();
 const User = require('./user.model');
@@ -5,7 +193,7 @@ const generateToken = require('../middleware/generateToken');
 const verifyToken = require('../middleware/verifyToken');
 require('dotenv').config()
 
-// Register endpoint
+// ✅ Register endpoint
 router.post('/register', async (req, res) => {
     try {
         const { email, password, username } = req.body;
@@ -15,7 +203,6 @@ router.post('/register', async (req, res) => {
     } catch (error) {
         console.error('Error registering user:', error);
 
-        // ✅ THE FIX: Catch the MongoDB Duplicate Key Error!
         if (error.code === 11000) {
             return res.status(400).send({ message: 'Email is already registered. Please use a different email or log in.' });
         }
@@ -24,7 +211,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login endpoint
+// ✅ Login endpoint (Manual)
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -41,11 +228,10 @@ router.post('/login', async (req, res) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: true, // Ensure this is true for HTTPS
+            secure: true, 
             sameSite: 'None'
         });
 
-        // IMPORTANT: We cannot send two responses, so I combined this into one clean send!
         res.status(200).send({
             message: 'Logged in successfully',
             token,
@@ -65,14 +251,60 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Logout endpoint (optional)
+// ✅ NEW: Google Login/Signup Endpoint
+router.post('/google-login', async (req, res) => {
+    try {
+        const { email, username, profileImage } = req.body;
+
+        // 1. Check if user already exists in DB
+        let user = await User.findOne({ email });
+
+        // 2. If user doesn't exist, create a new one (Auto-Signup)
+        if (!user) {
+            user = new User({
+                email,
+                username,
+                profileImage,
+                // Assigning a random password for Google users as they won't use it
+                password: Math.random().toString(36).slice(-8), 
+                role: 'user'
+            });
+            await user.save();
+        }
+
+        // 3. Generate Token
+        const token = await generateToken(user._id);
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None'
+        });
+
+        res.status(200).send({
+            message: 'Logged in successfully with Google',
+            token,
+            user: {
+                _id: user._id,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                profileImage: user.profileImage
+            }
+        });
+    } catch (error) {
+        console.error('Error with Google Login:', error);
+        res.status(500).send({ message: 'Google login failed' });
+    }
+});
+
+// ✅ Logout endpoint
 router.post('/logout', (req, res) => {
     res.clearCookie('token');
     res.status(200).send({ message: 'Logged out successfully' });
 });
 
-
-// all users 
+// ✅ All users 
 router.get('/users', async (req, res) => {
     try {
         const users = await User.find({}, 'id email role').sort({ createdAt: -1 });
@@ -83,7 +315,7 @@ router.get('/users', async (req, res) => {
     }
 });
 
-// delete a user
+// ✅ Delete a user
 router.delete('/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -98,7 +330,7 @@ router.delete('/users/:id', async (req, res) => {
     }
 })
 
-// update a user role
+// ✅ Update a user role
 router.put('/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -114,33 +346,27 @@ router.put('/users/:id', async (req, res) => {
     }
 });
 
-// Edit Profile endpoint
+// ✅ Edit Profile endpoint
 router.patch('/edit-profile', async (req, res) => {
     try {
-        // Destructure fields from the request body
         const { userId, username, profileImage, bio, profession } = req.body;
 
-        // Check if userId is provided
         if (!userId) {
             return res.status(400).send({ message: 'User ID is required' });
         }
 
-        // Find user by ID
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
 
-        // Update the user's profile with provided fields
         if (username !== undefined) user.username = username;
         if (profileImage !== undefined) user.profileImage = profileImage;
         if (bio !== undefined) user.bio = bio;
         if (profession !== undefined) user.profession = profession;
 
-        // Save the updated user profile
         await user.save();
 
-        // Send the updated user profile as the response
         res.status(200).send({
             message: 'Profile updated successfully',
             user: {
@@ -159,9 +385,9 @@ router.patch('/edit-profile', async (req, res) => {
     }
 });
 
+// ✅ Admin Manual Creation Route
 router.get('/create-admin-manual', async (req, res) => {
     try {
-        const User = require('./user.model'); // Ensure model is imported
         const existing = await User.findOne({ email: "adminwahab@gmail.com" });
         if (existing) return res.send("Admin already exists in DB!");
 
