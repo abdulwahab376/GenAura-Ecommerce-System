@@ -156,14 +156,14 @@ import {
   useSendMessageMutation, 
   useUpdateChatStatusMutation,
   useDeleteMessageMutation,
-  useUpdateMessageMutation 
+  useUpdateMessageMutation,
+  useMarkAsReadMutation // 👈 Yeh new hook check karein agar aapke chatsApi mein hai
 } from '../../../../redux/features/chats/chatsApi';
 
 const AdminChatDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // 🚀 References for Smart Scroll
   const chatContainerRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -175,6 +175,7 @@ const AdminChatDetail = () => {
   const [updateDbStatus] = useUpdateChatStatusMutation();
   const [deleteMessage] = useDeleteMessageMutation();
   const [updateMessage] = useUpdateMessageMutation();
+  const [markAsRead] = useMarkAsReadMutation(); // 👈 Notification clear karne ke liye
 
   const { data: orders } = useGetAllOrdersQuery();
   const currentOrder = orders?.find(o => o._id === id);
@@ -183,6 +184,7 @@ const AdminChatDetail = () => {
   const [inputText, setInputText] = useState('');
   const [editingMessageId, setEditingMessageId] = useState(null);
 
+  // 1. Initial Admin Message Logic
   const initialAdminMessage = { 
     _id: 'instruction-msg-static', 
     sender: 'admin', 
@@ -196,36 +198,41 @@ const AdminChatDetail = () => {
 
   const status = dbChat?.status || 'Pending';
 
+  // 🚀 MARK AS READ LOGIC
+  // Jab bhi naye messages aayein (polling se) ya chat open ho, read mark kardo
+  useEffect(() => {
+    const clearNotifications = async () => {
+      try {
+        // Check if there are unread messages from user
+        const hasUnread = dbChat?.messages?.some(m => m.sender === 'user' && !m.isRead);
+        if (hasUnread) {
+          await markAsRead(id).unwrap();
+        }
+      } catch (err) {
+        console.error("Failed to mark as read:", err);
+      }
+    };
+    if (dbChat) clearNotifications();
+  }, [dbChat, id, markAsRead]);
+
   // 🚀 SMART SCROLL LOGIC
   const scrollToBottom = (force = false) => {
     if (chatContainerRef.current) {
       const { scrollHeight, clientHeight, scrollTop } = chatContainerRef.current;
-      
-      // Check if user is near bottom (150px threshold)
       const isAtBottom = scrollHeight - scrollTop <= clientHeight + 150;
-
       if (force || isAtBottom) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };
 
-  // Auto-scroll when messages change (polling)
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Initial scroll when chat opens
   useEffect(() => {
     const timer = setTimeout(() => scrollToBottom(true), 100);
     return () => clearTimeout(timer);
-  }, [id]);
-
-  useEffect(() => {
-    localStorage.setItem(`chat_read_${id}`, 'true');
-    const channel = new BroadcastChannel('payment_sync');
-    channel.postMessage({ action: 'chat_opened', orderId: id });
-    return () => channel.close();
   }, [id]);
 
   const sendMessage = async () => {
@@ -233,11 +240,11 @@ const AdminChatDetail = () => {
     
     try {
       if (editingMessageId) {
-        await updateMessage({ 
-          orderId: id, 
-          messageId: editingMessageId, 
-          message: { text: inputText.trim(), sender: 'admin', updatedAt: new Date() } 
-        }).unwrap();
+       await updateMessage({ 
+  orderId: id, 
+  messageId: editingMessageId, 
+  message: inputText.trim() // Sirf text bhejna hai, backend baki cheezein sambhaal lega
+}).unwrap();
         setEditingMessageId(null);
       } else {
         const newMessageObj = { 
@@ -246,8 +253,6 @@ const AdminChatDetail = () => {
           createdAt: new Date() 
         };
         await sendToDb({ id, message: newMessageObj }).unwrap();
-        
-        // Force scroll because admin sent a message
         setTimeout(() => scrollToBottom(true), 100);
       }
 
@@ -297,7 +302,6 @@ const AdminChatDetail = () => {
       channel.postMessage({ orderId: id, status: newStatus });
       channel.close();
       
-      // Status update pe bhi auto-scroll to bottom
       setTimeout(() => scrollToBottom(true), 200);
     } catch (err) {
       console.error("Database Update Error:", err);
@@ -321,7 +325,6 @@ const AdminChatDetail = () => {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 bg-white rounded-xl border border-gray-200 flex flex-col shadow-sm" style={{ height: '600px' }}>
           
-          {/* 🚀 Ref attached to container for scroll checking */}
           <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/50">
             {messages.map((msg, index) => (
               <div key={msg._id || index} className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
