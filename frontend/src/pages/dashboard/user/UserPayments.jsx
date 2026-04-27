@@ -114,49 +114,82 @@ import { useSelector } from 'react-redux';
 
 const UserPayments = () => {
   const { user } = useSelector((state) => state.auth);
-
   const { data: orders, error, isLoading } = useGetOrdersByEmailQuery(user?.email);
 
+  if (isLoading) {
+    return <div className="text-center py-10 text-gray-500">Loading payments...</div>;
+  }
 
-  if (isLoading) return <div>Loading...</div>;
+  if (error) {
+    return <div className="text-center py-10 text-red-500">Something went wrong!</div>;
+  }
 
-  // Calculate total payment
-  const totalPayment = orders?.reduce((acc, order) => acc + order.amount, 0).toFixed(2);
+  const totalPayment = orders?.reduce((acc, order) => acc + order.amount, 0) || 0;
 
   return (
-    <div className="py-6 px-4">
-      <h3 className="text-xl font-semibold text-blueGray-700 mb-4">Total Payments</h3>
-      <div className="bg-white p-8 shadow-lg rounded">
-        <p className="text-lg font-medium text-gray-800 mb-5">Total Spent: ${totalPayment ? totalPayment : 0}</p>
-        <ul>
-        
-          {
-           orders && orders.map((item, index) => (
-              <li key={index}>
-                <h5 className="font-medium text-gray-800 mb-2">Order #{index + 1}</h5>
-                <div key={index} className="flex items-center space-x-2">
-                  <span className="text-gray-600">Order #{item.id}</span>
-                  <span className="text-gray-600">${item.amount.toFixed(2)}</span>
+    <div className="py-8 px-4 max-w-3xl mx-auto">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+        💳 Your Payments
+      </h3>
+
+      <div className="bg-white p-6 shadow-xl rounded-2xl border border-gray-100">
+        {/* Total */}
+        <div className="mb-6 text-center">
+          <p className="text-gray-500">Total Spent</p>
+          <h2 className="text-3xl font-bold text-green-600">
+            Rs {totalPayment.toLocaleString()}
+          </h2>
+        </div>
+
+        {/* Orders */}
+        {orders?.length === 0 ? (
+          <p className="text-center text-gray-400">No payments found</p>
+        ) : (
+          <ul className="space-y-4">
+            {orders?.map((item, index) => (
+              <li
+                key={index}
+                className="p-4 rounded-xl border border-gray-200 hover:shadow-md transition"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <h5 className="font-semibold text-gray-700">
+                    Order #{index + 1}
+                  </h5>
+                  <span className="font-bold text-gray-800">
+                    Rs {item.amount.toLocaleString()}
+                  </span>
                 </div>
-                <div className="flex md:flex-row items-center space-x-2">
-                  <span className="text-gray-600">Date: {new Date(item.createdAt).toLocaleString()}</span>
-                  <p className="text-gray-600">Status:
-                    <span className={`ml-2 py-[2px] px-2 text-sm rounded ${item.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                      item.status === 'pending' ? 'bg-red-200 text-red-700' :
-                        item.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-blue-200 text-blue-700'}`}>
-                      {item.status}
-                    </span>
-                  </p>
+
+                <div className="text-sm text-gray-500 mb-2">
+                  ID: {item.id}
                 </div>
-                <hr className="my-2" />
+
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                  <span className="text-gray-500 text-sm">
+                    📅 {new Date(item.createdAt).toLocaleString()}
+                  </span>
+
+                  <span
+                    className={`text-xs px-3 py-1 rounded-full font-medium ${
+                      item.status === 'Completed'
+                        ? 'bg-green-100 text-green-700'
+                        : item.status === 'pending'
+                        ? 'bg-red-100 text-red-700'
+                        : item.status === 'processing'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-blue-100 text-blue-700'
+                    }`}
+                  >
+                    {item.status}
+                  </span>
+                </div>
               </li>
-            ))
-          }
-        </ul>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default UserPayments;
