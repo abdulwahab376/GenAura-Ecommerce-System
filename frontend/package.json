@@ -30,7 +30,8 @@
     "react-router-dom": "^6.26.0",
     "react-select": "^5.10.2",
     "remixicon": "^4.3.0",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.3",
+    "swiper": "^12.1.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
