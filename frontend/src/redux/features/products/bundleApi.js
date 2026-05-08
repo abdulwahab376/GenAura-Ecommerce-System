@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { getBaseUrl } from '../../../utils/baseUrl'; // Path check kar lain (ek step aur piche jana paray ga)
+import { getBaseUrl } from '../../../utils/baseUrl'; 
 
 export const bundleApi = createApi({
     reducerPath: 'bundleApi',
@@ -15,10 +15,19 @@ export const bundleApi = createApi({
     }),
     tagTypes: ['Bundles'],
     endpoints: (builder) => ({
+        // 1. Get All Bundles
         getBundles: builder.query({
             query: () => '/',
             providesTags: ['Bundles'],
         }),
+
+        // 2. Get Single Bundle (For Editing)
+        getBundleById: builder.query({
+            query: (id) => `/${id}`,
+            providesTags: (result, error, id) => [{ type: 'Bundles', id }],
+        }),
+
+        // 3. Add New Bundle
         addBundle: builder.mutation({
             query: (newBundle) => ({
                 url: '/add-bundle',
@@ -27,6 +36,18 @@ export const bundleApi = createApi({
             }),
             invalidatesTags: ['Bundles'],
         }),
+
+        // 4. Update Bundle (Edit Logic)
+        updateBundle: builder.mutation({
+            query: ({ id, ...updatedBundle }) => ({
+                url: `/${id}`,
+                method: 'PATCH', // Ya 'PUT' jo aapke backend mein set ho
+                body: updatedBundle,
+            }),
+            invalidatesTags: ['Bundles'],
+        }),
+
+        // 5. Delete Bundle
         deleteBundle: builder.mutation({
             query: (id) => ({
                 url: `/${id}`,
@@ -39,6 +60,8 @@ export const bundleApi = createApi({
 
 export const { 
     useGetBundlesQuery, 
+    useGetBundleByIdQuery, // Naya Hook
     useAddBundleMutation, 
+    useUpdateBundleMutation, // Naya Hook
     useDeleteBundleMutation 
 } = bundleApi;

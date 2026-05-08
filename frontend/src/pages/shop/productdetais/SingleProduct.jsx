@@ -97,7 +97,8 @@
 //                         </div>
                         
 //                         <div className="flex items-center gap-4 mb-6">
-//                             <span className="text-3xl font-black text-primary">${singleProduct?.price}</span>
+//                             {/* ✅ UPDATED: Changed $ to Rs. */}
+//                             <span className="text-3xl font-black text-primary">Rs. {singleProduct?.price}</span>
 //                         </div>
 
 //                         {singleProduct?.color?.length > 0 && (
@@ -136,7 +137,6 @@
 
 //                         <div className="border-t border-b py-4 my-6">
 //                             <h4 className="font-bold text-gray-800 mb-1 uppercase text-xs tracking-widest">Description</h4>
-//                             {/* ✅ FIXED: whitespace-pre-line added here */}
 //                             <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-line">
 //                                 {singleProduct?.description}
 //                             </p>
@@ -180,8 +180,6 @@
 
 // export default SingleProduct;
 
-
-
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom'; 
 import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi';
@@ -190,6 +188,8 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
 import { toast } from 'react-hot-toast';
+// 🚀 Naya Component Import
+import RelatedProducts from './RelatedProducts';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -281,7 +281,6 @@ const SingleProduct = () => {
                         </div>
                         
                         <div className="flex items-center gap-4 mb-6">
-                            {/* ✅ UPDATED: Changed $ to Rs. */}
                             <span className="text-3xl font-black text-primary">Rs. {singleProduct?.price}</span>
                         </div>
 
@@ -351,13 +350,23 @@ const SingleProduct = () => {
                 </div>
             </section>
 
-            <section className="section__container mt-16 border-t pt-10">
-                <div className="mb-8">
-                    <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Customer Reviews</h3>
-                    <p className="text-gray-500">Real feedback from our Lebaba community</p>
-                </div>
-                <ReviewsCard productReviews={productReviews}/>
-            </section>
+           {/* ✅ REVIEWS SECTION - Spacing kam kar di */}
+<section className="section__container !mt-4 border-t !pt-4 !pb-0"> 
+    <div className="mb-4"> {/* mb-8 ko mb-4 kiya */}
+        <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Customer Reviews</h3>
+        <p className="text-gray-500 text-sm">Real feedback from our Lebaba community</p>
+    </div>
+    <ReviewsCard productReviews={productReviews}/>
+</section>
+
+            {/* 🚀 RELATED PRODUCTS SECTION */}
+           {/* 🚀 'section__container' ke sath '!mt-0 !pt-0' add karein */}
+<div className="section__container !mt-0 !pt-0">
+    <RelatedProducts 
+        category={singleProduct?.category} 
+        currentProductId={singleProduct?._id} 
+    />
+</div>
         </>
     );
 };

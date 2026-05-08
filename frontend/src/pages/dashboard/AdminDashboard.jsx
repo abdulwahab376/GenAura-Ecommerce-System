@@ -150,7 +150,8 @@ import { useDispatch } from 'react-redux';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../../redux/features/auth/authSlice';
 import { toast } from 'react-hot-toast';
-import { LayoutDashboard, PlusCircle, Package, Users, ShoppingCart, MessageSquare, LogOut, Gift } from 'lucide-react'; // Added Gift Icon
+// 🚀 Added Settings Icon for Manage Deals
+import { LayoutDashboard, PlusCircle, Package, Users, ShoppingCart, MessageSquare, LogOut, Gift, Settings2 } from 'lucide-react'; 
 
 const AdminDashboard = () => {
     const [logoutUser] = useLogoutUserMutation();
@@ -224,11 +225,18 @@ const AdminDashboard = () => {
                         </NavLink>
                     </li>
 
-                    {/* 🚀 NEW BUNDLE DEAL BUTTON */}
                     <li>
                         <NavLink to="/dashboard/add-bundle" className={navItemStyle}>
                             <Gift size={18} strokeWidth={1.8} className="text-red-500" />
                             <span className="text-xs uppercase tracking-wider font-medium">Add Hot Deal</span>
+                        </NavLink>
+                    </li>
+
+                     {/* 🚀 NEW: MANAGE BUNDLES BUTTON */}
+                    <li>
+                        <NavLink to="/dashboard/manage-bundles" className={navItemStyle}>
+                            <Settings2 size={18} strokeWidth={1.8} />
+                            <span className="text-xs uppercase tracking-wider font-medium">Manage Hot Deals</span>
                         </NavLink>
                     </li>
 
@@ -238,6 +246,9 @@ const AdminDashboard = () => {
                             <span className="text-xs uppercase tracking-wider font-medium">Inventory</span>
                         </NavLink>
                     </li>
+
+    
+
                     <li>
                         <NavLink to="/dashboard/users" className={navItemStyle}>
                             <Users size={18} strokeWidth={1.8} />

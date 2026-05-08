@@ -2,21 +2,41 @@ import React from "react";
 import { useGetBundlesQuery } from "../redux/features/products/bundleApi";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
+import { useDispatch } from "react-redux"; 
+import { addToCart } from "../redux/features/cart/cartSlice"; 
+import { Link } from "react-router-dom"; 
+import { toast } from "react-hot-toast"; 
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
 const DealProducts = () => {
   const { data: bundles, isLoading, error } = useGetBundlesQuery();
+  const dispatch = useDispatch(); 
+
+  // 🚀 Add to Cart Logic
+  const handleAddToCart = (e, deal) => {
+    e.preventDefault(); 
+    const cartProduct = {
+      _id: deal._id,
+      // 🚀 'title' ko 'name' kar diya taake cart mein naam sahi nazar aaye
+      name: deal.title, 
+      price: deal.dealPrice,
+      image: deal.image,
+      quantity: 1,
+      type: 'bundle'
+    };
+    dispatch(addToCart(cartProduct));
+    toast.success(`${deal.title} added to cart!`);
+  };
 
   if (isLoading) return <div className="text-center py-10 font-black uppercase tracking-[4px] text-slate-300">Loading Hot Deals...</div>;
   if (error) return <div className="text-center py-10 text-red-500 font-bold">Failed to connect to API</div>;
 
   return (
-    <section className="py-12 bg-white"> {/* Section padding kam ki */}
+    <section className="py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         
-        {/* Header Section Compact */}
         <div className="text-center mb-10">
           <h2 className="text-3xl font-black uppercase tracking-tighter text-gray-900 mb-1">
             Exclusive Bundle Deals
@@ -27,7 +47,6 @@ const DealProducts = () => {
           </p>
         </div>
 
-        {/* Bundle Grid with tighter gap */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {bundles && bundles.length > 0 ? (
             bundles.map((deal) => {
@@ -36,12 +55,11 @@ const DealProducts = () => {
               return (
                 <div key={deal._id} className="bg-white rounded-[20px] overflow-hidden shadow-xl shadow-slate-100 hover:shadow-indigo-50 transition-all duration-500 border border-slate-100 flex flex-col group">
                   
-                  {/* Image Container - Height reduced to 64 (256px) */}
-                  <div className="relative h-64 overflow-hidden bg-white">
+                  <Link to={`/bundles/${deal._id}`} className="relative h-64 overflow-hidden bg-white block">
                     <Swiper
                       modules={[Autoplay, Pagination, EffectFade]}
                       effect={'fade'}
-                      autoplay={{ delay: 3000, disableOnInteraction: false }}
+                      autoplay={{ delay: 2000, disableOnInteraction: false }}
                       pagination={{ clickable: true }}
                       className="h-full w-full"
                     >
@@ -56,25 +74,24 @@ const DealProducts = () => {
                       ))}
                     </Swiper>
                     
-                    {/* RED BADGE - Adjusted position */}
                     <div className="absolute top-3 right-3 bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md z-20">
                       {deal.badgeText || "HOT DEAL"}
                     </div>
-                  </div>
+                  </Link>
 
-                  {/* Content Box - Reduced padding from p-8 to p-5 */}
                   <div className="p-5 flex-grow flex flex-col justify-between">
                     <div className="mb-4">
-                      <h3 className="text-lg font-black text-gray-900 uppercase tracking-tighter mb-1 line-clamp-1">
-                        {deal.title}
-                      </h3>
+                      <Link to={`/bundles/${deal._id}`}>
+                        <h3 className="text-lg font-black text-gray-900 uppercase tracking-tighter mb-1 line-clamp-1 hover:text-red-600 transition-colors">
+                          {deal.title}
+                        </h3>
+                      </Link>
                       <p className="text-gray-400 text-[12px] font-medium leading-snug line-clamp-2 italic">
                         {deal.description}
                       </p>
                     </div>
                     
                     <div>
-                      {/* Price Section - Compact Padding */}
                       <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl mb-4">
                         <div className="flex flex-col">
                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Bundle Price</span>
@@ -86,7 +103,10 @@ const DealProducts = () => {
                         </div>
                       </div>
 
-                      <button className="w-full bg-gray-900 text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-[1.5px] hover:bg-red-600 transition-all duration-300 active:scale-95 shadow-md">
+                      <button 
+                        onClick={(e) => handleAddToCart(e, deal)}
+                        className="w-full bg-gray-900 text-white py-3 rounded-xl font-black text-[11px] uppercase tracking-[1.5px] hover:bg-red-600 transition-all duration-300 active:scale-95 shadow-md"
+                      >
                         Add Bundle To Cart
                       </button>
                     </div>

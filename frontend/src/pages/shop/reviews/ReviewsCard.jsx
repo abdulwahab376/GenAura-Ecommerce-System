@@ -18,48 +18,75 @@ const ReviewsCard = ({ productReviews }) => {
     const reviews = productReviews || [];
 
     return (
-        <div className="my-6 bg-white p-8">
+        <div className="my-2 bg-white px-4 py-6 md:p-8 rounded-xl shadow-sm border border-gray-50">
             <div>
                 {reviews.length > 0 ? (
-                    <div>
-                        <h3 className="text-lg font-medium">All Comments...</h3>
-                        <div>
+                    <div className="space-y-8">
+                        <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-2">
+                            <i className="ri-chat-3-line text-primary"></i>
+                            Community Feedback ({reviews.length})
+                        </h3>
+                        
+                        <div className="space-y-6">
                             {reviews.map((review, index) => (
-                                <div key={index} className="mt-4">
-                                    <div className="flex gap-4 items-center">
-                                        <img src={CommentorIcon} alt="" className="h-14 w-14" />
-                                        <div className="space-y-1">
-                                            <p className="text-lg font-medium underline capitalize underline-offset-4 text-blue-400">
-                                                {/* ✅ Fixed: Optional chaining lagayi hai taake null error na aaye */}
-                                                {review?.userId?.username || "Guest User"}
-                                            </p>
-                                            <p className="text-[12px] italic">
-                                                {formatDate(review?.createdAt)}
-                                            </p>
-                                            <RatingStars rating={review?.rating}/>
+                                <div key={index} className="group transition-all duration-300">
+                                    <div className="flex gap-4 items-start">
+                                        {/* Avatar Styling */}
+                                        <div className="relative">
+                                            <img 
+                                                src={CommentorIcon} 
+                                                alt="user" 
+                                                className="h-12 w-12 md:h-14 md:w-14 rounded-full border-2 border-gray-100 p-0.5 object-cover shadow-sm group-hover:border-primary transition-colors" 
+                                            />
+                                            <div className="absolute -bottom-1 -right-1 bg-green-500 h-3.5 w-3.5 rounded-full border-2 border-white"></div>
                                         </div>
-                                    </div>
 
-                                    {/* Comment details */}
-                                    <div className="text-gray-600 mt-5 border p-8">
-                                        <p className="md:w-4/5">{review?.comment}</p>
+                                        <div className="flex-grow">
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
+                                                <div>
+                                                    <p className="text-base font-black text-gray-800 capitalize leading-none mb-1">
+                                                        {review?.userId?.username || "Verified Customer"}
+                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <RatingStars rating={review?.rating}/>
+                                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded">
+                                                            {formatDate(review?.createdAt)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Comment Bubble Style */}
+                                            <div className="relative bg-gray-50/50 p-4 rounded-2xl rounded-tl-none border border-gray-100 group-hover:bg-white group-hover:shadow-md transition-all duration-300">
+                                                <p className="text-gray-600 text-sm leading-relaxed italic">
+                                                    "{review?.comment}"
+                                                </p>
+                                                {/* Decorative Quote Icon */}
+                                                <i className="ri-double-quotes-r absolute bottom-2 right-4 text-gray-200 text-xl"></i>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 ) : (
-                    <p>No reviews yet.</p>
+                    <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                        <i className="ri-discuss-line text-4xl text-gray-300 mb-2 block"></i>
+                        <p className="text-gray-500 font-medium italic">No reviews yet. Be the first to share your thoughts!</p>
+                    </div>
                 )}
             </div>
 
-            {/* Add comment section */}
-            <div className='mt-12'>
+            {/* Add comment button - Pro Look */}
+            <div className='mt-10 flex justify-center md:justify-start'>
                 <button
                     onClick={handleOpenReviewModal}
-                    className="px-6 py-3 bg-primary text-white rounded-md flex items-center gap-2"
+                    className="group relative px-8 py-3.5 bg-gray-900 text-white rounded-full overflow-hidden transition-all hover:bg-primary hover:shadow-xl hover:shadow-primary/20 active:scale-95"
                 >
-                    <i className="ri-pencil-line mr-2"></i> Add A Comment
+                    <span className="relative z-10 flex items-center gap-2 font-bold text-xs uppercase tracking-widest">
+                        <i className="ri-edit-2-fill text-sm"></i> Write A Review
+                    </span>
                 </button>
             </div>
 
