@@ -31,29 +31,30 @@ import Categories from './Categories'
 import HeroSection from './HeroSection'
 import TrendingProducts from '../shop/TrendingProducts'
 // 🚀 Naya Component Import (Jo hum ne abhi design kiya hai)
-import DealProducts from "../../components/DealProducts"; 
+import DealProducts from "../../components/DealProducts";
 import DealsSection from './DealsSection'
 import PromoBanner from './PromoBanner'
 import Blogs from '../blogs/Blogs'
+import RecommendedForYou from "./RecommendedForYou";
 
 const Home = () => {
   return (
     <>
-      <Banner/>
-      <Categories/>
-      <HeroSection/>
-      
+      <Banner />
+      <Categories />
+      <HeroSection />
+
       {/* 1. Trending Products Section */}
-      <TrendingProducts/>
+      <TrendingProducts />
 
       {/* 2. New Section: Deals Of This Month Products (Clean Grid) */}
-      <DealProducts/> 
+      <DealProducts />
 
       {/* 3. Deals Banner Section (Blue Background wala) */}
-      <DealsSection/>
-
-      <PromoBanner/>
-      <Blogs/>
+      <DealsSection />
+      <RecommendedForYou />
+      <PromoBanner />
+      <Blogs />
     </>
   )
 }

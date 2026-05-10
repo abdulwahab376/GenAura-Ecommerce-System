@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/features/cart/cartSlice"; 
 import { Link } from "react-router-dom"; 
 import { toast } from "react-hot-toast"; 
+import { trackClick } from "../utils/trackBehavior";
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
@@ -14,12 +15,10 @@ const DealProducts = () => {
   const { data: bundles, isLoading, error } = useGetBundlesQuery();
   const dispatch = useDispatch(); 
 
-  // 🚀 Add to Cart Logic
   const handleAddToCart = (e, deal) => {
     e.preventDefault(); 
     const cartProduct = {
       _id: deal._id,
-      // 🚀 'title' ko 'name' kar diya taake cart mein naam sahi nazar aaye
       name: deal.title, 
       price: deal.dealPrice,
       image: deal.image,
@@ -55,7 +54,11 @@ const DealProducts = () => {
               return (
                 <div key={deal._id} className="bg-white rounded-[20px] overflow-hidden shadow-xl shadow-slate-100 hover:shadow-indigo-50 transition-all duration-500 border border-slate-100 flex flex-col group">
                   
-                  <Link to={`/bundles/${deal._id}`} className="relative h-64 overflow-hidden bg-white block">
+                  <Link 
+                    to={`/bundles/${deal._id}`} 
+                    onClick={() => trackClick(deal.category || deal.title)}
+                    className="relative h-64 overflow-hidden bg-white block"
+                  >
                     <Swiper
                       modules={[Autoplay, Pagination, EffectFade]}
                       effect={'fade'}
@@ -81,7 +84,10 @@ const DealProducts = () => {
 
                   <div className="p-5 flex-grow flex flex-col justify-between">
                     <div className="mb-4">
-                      <Link to={`/bundles/${deal._id}`}>
+                      <Link 
+                        to={`/bundles/${deal._id}`}
+                        onClick={() => trackClick(deal.category || deal.title)}
+                      >
                         <h3 className="text-lg font-black text-gray-900 uppercase tracking-tighter mb-1 line-clamp-1 hover:text-red-600 transition-colors">
                           {deal.title}
                         </h3>
