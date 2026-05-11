@@ -3,9 +3,10 @@
 // const User = require('./user.model');
 // const generateToken = require('../middleware/generateToken');
 // const verifyToken = require('../middleware/verifyToken');
+// const nodemailer = require('nodemailer'); // 🚀 Naya Import
 // require('dotenv').config()
 
-// // Register endpoint
+// // ✅ Register endpoint
 // router.post('/register', async (req, res) => {
 //     try {
 //         const { email, password, username } = req.body;
@@ -15,7 +16,6 @@
 //     } catch (error) {
 //         console.error('Error registering user:', error);
 
-//         // ✅ THE FIX: Catch the MongoDB Duplicate Key Error!
 //         if (error.code === 11000) {
 //             return res.status(400).send({ message: 'Email is already registered. Please use a different email or log in.' });
 //         }
@@ -24,7 +24,7 @@
 //     }
 // });
 
-// // Login endpoint
+// // ✅ Login endpoint (Manual)
 // router.post('/login', async (req, res) => {
 //     try {
 //         const { email, password } = req.body;
@@ -41,11 +41,10 @@
 
 //         res.cookie('token', token, {
 //             httpOnly: true,
-//             secure: true, // Ensure this is true for HTTPS
+//             secure: true, 
 //             sameSite: 'None'
 //         });
 
-//         // IMPORTANT: We cannot send two responses, so I combined this into one clean send!
 //         res.status(200).send({
 //             message: 'Logged in successfully',
 //             token,
@@ -65,14 +64,60 @@
 //     }
 // });
 
-// // Logout endpoint (optional)
+// // ✅ NEW: Google Login/Signup Endpoint
+// router.post('/google-login', async (req, res) => {
+//     try {
+//         const { email, username, profileImage } = req.body;
+
+//         // 1. Check if user already exists in DB
+//         let user = await User.findOne({ email });
+
+//         // 2. If user doesn't exist, create a new one (Auto-Signup)
+//         if (!user) {
+//             user = new User({
+//                 email,
+//                 username,
+//                 profileImage,
+//                 // Assigning a random password for Google users as they won't use it
+//                 password: Math.random().toString(36).slice(-8), 
+//                 role: 'user'
+//             });
+//             await user.save();
+//         }
+
+//         // 3. Generate Token
+//         const token = await generateToken(user._id);
+
+//         res.cookie('token', token, {
+//             httpOnly: true,
+//             secure: true,
+//             sameSite: 'None'
+//         });
+
+//         res.status(200).send({
+//             message: 'Logged in successfully with Google',
+//             token,
+//             user: {
+//                 _id: user._id,
+//                 email: user.email,
+//                 username: user.username,
+//                 role: user.role,
+//                 profileImage: user.profileImage
+//             }
+//         });
+//     } catch (error) {
+//         console.error('Error with Google Login:', error);
+//         res.status(500).send({ message: 'Google login failed' });
+//     }
+// });
+
+// // ✅ Logout endpoint
 // router.post('/logout', (req, res) => {
 //     res.clearCookie('token');
 //     res.status(200).send({ message: 'Logged out successfully' });
 // });
 
-
-// // all users 
+// // ✅ All users 
 // router.get('/users', async (req, res) => {
 //     try {
 //         const users = await User.find({}, 'id email role').sort({ createdAt: -1 });
@@ -83,7 +128,7 @@
 //     }
 // });
 
-// // delete a user
+// // ✅ Delete a user
 // router.delete('/users/:id', async (req, res) => {
 //     try {
 //         const { id } = req.params;
@@ -98,7 +143,7 @@
 //     }
 // })
 
-// // update a user role
+// // ✅ Update a user role
 // router.put('/users/:id', async (req, res) => {
 //     try {
 //         const { id } = req.params;
@@ -114,33 +159,27 @@
 //     }
 // });
 
-// // Edit Profile endpoint
+// // ✅ Edit Profile endpoint
 // router.patch('/edit-profile', async (req, res) => {
 //     try {
-//         // Destructure fields from the request body
 //         const { userId, username, profileImage, bio, profession } = req.body;
 
-//         // Check if userId is provided
 //         if (!userId) {
 //             return res.status(400).send({ message: 'User ID is required' });
 //         }
 
-//         // Find user by ID
 //         const user = await User.findById(userId);
 //         if (!user) {
 //             return res.status(404).send({ message: 'User not found' });
 //         }
 
-//         // Update the user's profile with provided fields
 //         if (username !== undefined) user.username = username;
 //         if (profileImage !== undefined) user.profileImage = profileImage;
 //         if (bio !== undefined) user.bio = bio;
 //         if (profession !== undefined) user.profession = profession;
 
-//         // Save the updated user profile
 //         await user.save();
 
-//         // Send the updated user profile as the response
 //         res.status(200).send({
 //             message: 'Profile updated successfully',
 //             user: {
@@ -159,9 +198,9 @@
 //     }
 // });
 
+// // ✅ Admin Manual Creation Route
 // router.get('/create-admin-manual', async (req, res) => {
 //     try {
-//         const User = require('./user.model'); // Ensure model is imported
 //         const existing = await User.findOne({ email: "adminwahab@gmail.com" });
 //         if (existing) return res.send("Admin already exists in DB!");
 
@@ -179,10 +218,58 @@
 //     }
 // });
 
+// // ✅ PROMOTIONAL EMAIL ROUTE (Final Year Project Feature)
+// router.post('/send-promo-email', async (req, res) => {
+//     const { subject, message } = req.body;
+
+//     try {
+//         // 1. Database se saare users ke emails nikalna
+//         const users = await User.find({}, 'email');
+//         if (users.length === 0) return res.status(404).send({ message: "No users found" });
+        
+//         const emailList = users.map(u => u.email).join(', ');
+
+//         // 2. Transporter setup
+//         const transporter = nodemailer.createTransport({
+//             service: 'gmail',
+//             auth: {
+//                 user: process.env.EMAIL_USER,
+//                 pass: process.env.EMAIL_PASS
+//             }
+//         });
+
+//         // 3. Email Design
+//         const mailOptions = {
+//             from: `"Lebaba Store Admin" <${process.env.EMAIL_USER}>`,
+//             bcc: emailList,
+//             subject: subject,
+//             html: `
+//                 <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #f0f0f0; border-radius: 10px; overflow: hidden;">
+//                     <div style="background: #000; padding: 20px; text-align: center;">
+//                         <h1 style="color: #fff; margin: 0; letter-spacing: 5px;">LEBABA</h1>
+//                     </div>
+//                     <div style="padding: 40px 20px; text-align: center; background: #fff;">
+//                         <h2 style="color: #333; text-transform: uppercase;">Exciting News!</h2>
+//                         <p style="color: #666; font-size: 16px; line-height: 1.6;">${message}</p>
+//                         <a href="http://localhost:5173/shop" style="display: inline-block; margin-top: 25px; padding: 15px 30px; background: #d90429; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;">VISIT STORE</a>
+//                     </div>
+//                     <div style="background: #f9f9f9; padding: 15px; text-align: center; font-size: 11px; color: #999;">
+//                         © 2026 Lebaba Store. All rights reserved. <br/> Jhelum, Pakistan.
+//                     </div>
+//                 </div>
+//             `
+//         };
+
+//         await transporter.sendMail(mailOptions);
+//         res.status(200).send({ message: "Promotional emails sent successfully!" });
+
+//     } catch (error) {
+//         console.error('Email sending failed:', error);
+//         res.status(500).send({ message: 'Failed to send emails' });
+//     }
+// });
+
 // module.exports = router;
-
-
-
 
 
 
@@ -191,6 +278,7 @@ const router = express.Router();
 const User = require('./user.model');
 const generateToken = require('../middleware/generateToken');
 const verifyToken = require('../middleware/verifyToken');
+const nodemailer = require('nodemailer');
 require('dotenv').config()
 
 // ✅ Register endpoint
@@ -202,11 +290,9 @@ router.post('/register', async (req, res) => {
         res.status(201).send({ message: 'User registered successfully' });
     } catch (error) {
         console.error('Error registering user:', error);
-
         if (error.code === 11000) {
             return res.status(400).send({ message: 'Email is already registered. Please use a different email or log in.' });
         }
-
         res.status(500).send({ message: 'Registration failed' });
     }
 });
@@ -223,15 +309,12 @@ router.post('/login', async (req, res) => {
         if (!isMatch) {
             return res.status(401).send({ message: 'Invalid credentials' });
         }
-
         const token = await generateToken(user._id);
-
         res.cookie('token', token, {
             httpOnly: true,
             secure: true, 
             sameSite: 'None'
         });
-
         res.status(200).send({
             message: 'Logged in successfully',
             token,
@@ -251,36 +334,27 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// ✅ NEW: Google Login/Signup Endpoint
+// ✅ Google Login/Signup Endpoint
 router.post('/google-login', async (req, res) => {
     try {
         const { email, username, profileImage } = req.body;
-
-        // 1. Check if user already exists in DB
         let user = await User.findOne({ email });
-
-        // 2. If user doesn't exist, create a new one (Auto-Signup)
         if (!user) {
             user = new User({
                 email,
                 username,
                 profileImage,
-                // Assigning a random password for Google users as they won't use it
                 password: Math.random().toString(36).slice(-8), 
                 role: 'user'
             });
             await user.save();
         }
-
-        // 3. Generate Token
         const token = await generateToken(user._id);
-
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
             sameSite: 'None'
         });
-
         res.status(200).send({
             message: 'Logged in successfully with Google',
             token,
@@ -350,23 +424,18 @@ router.put('/users/:id', async (req, res) => {
 router.patch('/edit-profile', async (req, res) => {
     try {
         const { userId, username, profileImage, bio, profession } = req.body;
-
         if (!userId) {
             return res.status(400).send({ message: 'User ID is required' });
         }
-
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
-
         if (username !== undefined) user.username = username;
         if (profileImage !== undefined) user.profileImage = profileImage;
         if (bio !== undefined) user.bio = bio;
         if (profession !== undefined) user.profession = profession;
-
         await user.save();
-
         res.status(200).send({
             message: 'Profile updated successfully',
             user: {
@@ -390,18 +459,78 @@ router.get('/create-admin-manual', async (req, res) => {
     try {
         const existing = await User.findOne({ email: "adminwahab@gmail.com" });
         if (existing) return res.send("Admin already exists in DB!");
-
         const admin = new User({
             username: "Wahab Admin",
             email: "adminwahab@gmail.com",
             password: "wahabadmin",
             role: "admin"
         });
-
         await admin.save();
         res.send("Admin created successfully! Now try logging in at localhost:5173/login");
     } catch (err) {
         res.status(500).send("Error: " + err.message);
+    }
+});
+
+// ✅ BRANDED PROMOTIONAL EMAIL ROUTE
+router.post('/send-promo-email', async (req, res) => {
+    const { subject, message } = req.body;
+    try {
+        const users = await User.find({}, 'email');
+        if (users.length === 0) return res.status(404).send({ message: "No users found" });
+        const emailList = users.map(u => u.email).join(', ');
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: `"Lebaba Official" <${process.env.EMAIL_USER}>`,
+            bcc: emailList,
+            subject: subject,
+            html: `
+                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden;">
+                    <div style="background-color: #000000; padding: 25px; text-align: center;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 32px; letter-spacing: 6px; font-weight: 900;">LEBABA</h1>
+                        <p style="color: #d90429; margin: 5px 0 0; font-size: 10px; font-weight: bold; letter-spacing: 2px;">PREMIUM E-COMMERCE</p>
+                    </div>
+                    <div style="width: 100%; height: auto;">
+                        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80" alt="New Collection" style="width: 100%; display: block;">
+                    </div>
+                    <div style="padding: 40px 30px; text-align: center;">
+                        <h2 style="color: #1a1a1a; font-size: 24px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: -1px;">${subject}</h2>
+                        <div style="width: 40px; height: 2px; background-color: #d90429; margin: 0 auto 25px auto;"></div>
+                        <p style="color: #555555; font-size: 16px; line-height: 1.8; margin-bottom: 30px;">
+                            ${message}
+                        </p>
+                        <a href="http://localhost:5173/shop" style="display: inline-block; background-color: #000000; color: #ffffff; padding: 18px 45px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+                            Shop New Arrivals
+                        </a>
+                    </div>
+                    <div style="background-color: #fcfcfc; padding: 30px; border-top: 1px solid #f0f0f0; text-align: center;">
+                        <span style="font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; margin: 0 10px;">🚀 Free Delivery</span>
+                        <span style="font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; margin: 0 10px;">💳 Secure Payment</span>
+                    </div>
+                    <div style="background-color: #1a1a1a; padding: 30px; text-align: center;">
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 10px;">Stay Connected with Lebaba Community</p>
+                        <p style="color: #666666; font-size: 10px; margin: 0;">
+                            You are receiving this because you registered at Lebaba Store.<br/>
+                            Jhelum, Punjab, Pakistan.
+                        </p>
+                    </div>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.status(200).send({ message: "Promotional emails sent successfully!" });
+    } catch (error) {
+        console.error('Email sending failed:', error);
+        res.status(500).send({ message: 'Failed to send emails' });
     }
 });
 

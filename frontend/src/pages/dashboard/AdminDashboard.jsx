@@ -4,7 +4,8 @@
 // import { Link, NavLink, useNavigate } from 'react-router-dom';
 // import { logout } from '../../redux/features/auth/authSlice';
 // import { toast } from 'react-hot-toast';
-// import { LayoutDashboard, PlusCircle, Package, Users, ShoppingCart, MessageSquare, LogOut } from 'lucide-react';
+// // 🚀 Added Settings Icon for Manage Deals
+// import { LayoutDashboard, PlusCircle, Package, Users, ShoppingCart, MessageSquare, LogOut, Gift, Settings2 } from 'lucide-react'; 
 
 // const AdminDashboard = () => {
 //     const [logoutUser] = useLogoutUserMutation();
@@ -19,15 +20,11 @@
 //                 const msgs = event.data.messages;
 //                 const lastMsg = msgs[msgs.length - 1];
 
-//                 // If the user sent the message, increase count AND ring the bell!
 //                 if (lastMsg && lastMsg.sender === 'user') {
 //                     setUnreadChatCount(prev => prev + 1);
-
-//                     // Ring the notification bell
 //                     try {
 //                         const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-//                         // .catch prevents crashes if Chrome blocks the audio
-//                         audio.play().catch(e => console.log('Browser blocked audio. Click the screen once to allow.'));
+//                         audio.play().catch(e => console.log('Browser blocked audio.'));
 //                     } catch (error) { }
 //                 }
 //             }
@@ -39,7 +36,6 @@
 //         try {
 //             await logoutUser().unwrap();
 //             dispatch(logout());
-//             // Using sessionStorage for tab isolation
 //             sessionStorage.removeItem('token');
 //             sessionStorage.removeItem('user');
 //             toast.success("Logged out successfully!", {
@@ -77,21 +73,37 @@
 //                         </NavLink>
 //                     </li>
 //                     <li>
-//                         {/*  FIXED PATH: Matches router.jsx */}
 //                         <NavLink to="/dashboard/add-new-post" className={navItemStyle}>
 //                             <PlusCircle size={18} strokeWidth={1.8} />
 //                             <span className="text-xs uppercase tracking-wider font-medium">Add Product</span>
 //                         </NavLink>
 //                     </li>
+
 //                     <li>
-//                         {/*  FIXED PATH: Matches router.jsx */}
+//                         <NavLink to="/dashboard/add-bundle" className={navItemStyle}>
+//                             <Gift size={18} strokeWidth={1.8} className="text-red-500" />
+//                             <span className="text-xs uppercase tracking-wider font-medium">Add Hot Deal</span>
+//                         </NavLink>
+//                     </li>
+
+//                      {/* 🚀 NEW: MANAGE BUNDLES BUTTON */}
+//                     <li>
+//                         <NavLink to="/dashboard/manage-bundles" className={navItemStyle}>
+//                             <Settings2 size={18} strokeWidth={1.8} />
+//                             <span className="text-xs uppercase tracking-wider font-medium">Manage Hot Deals</span>
+//                         </NavLink>
+//                     </li>
+
+//                     <li>
 //                         <NavLink to="/dashboard/manage-products" className={navItemStyle}>
 //                             <Package size={18} strokeWidth={1.8} />
 //                             <span className="text-xs uppercase tracking-wider font-medium">Inventory</span>
 //                         </NavLink>
 //                     </li>
+
+    
+
 //                     <li>
-//                         {/*  FIXED PATH: Matches router.jsx */}
 //                         <NavLink to="/dashboard/users" className={navItemStyle}>
 //                             <Users size={18} strokeWidth={1.8} />
 //                             <span className="text-xs uppercase tracking-wider font-medium">Users</span>
@@ -107,14 +119,13 @@
 //                         <NavLink
 //                             to="/dashboard/chats"
 //                             className={navItemStyle}
-//                             onClick={() => setUnreadChatCount(0)} // Clears the red badge when you click to view chats
+//                             onClick={() => setUnreadChatCount(0)}
 //                         >
 //                             <div className="flex items-center gap-3">
 //                                 <MessageSquare size={18} strokeWidth={1.8} />
 //                                 <span className="text-xs uppercase tracking-wider font-medium">Chats</span>
 //                             </div>
 
-//                             {/* RED NOTIFICATION BADGE */}
 //                             {unreadChatCount > 0 && (
 //                                 <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-md">
 //                                     {unreadChatCount} New
@@ -142,16 +153,14 @@
 // export default AdminDashboard;
 
 
-
-
 import { React, useState, useEffect } from 'react'
 import { useLogoutUserMutation } from '../../redux/features/auth/authApi';
 import { useDispatch } from 'react-redux';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { logout } from '../../redux/features/auth/authSlice';
 import { toast } from 'react-hot-toast';
-// 🚀 Added Settings Icon for Manage Deals
-import { LayoutDashboard, PlusCircle, Package, Users, ShoppingCart, MessageSquare, LogOut, Gift, Settings2 } from 'lucide-react'; 
+// 🚀 Added Megaphone icon for Promo Emails
+import { LayoutDashboard, PlusCircle, Package, Users, ShoppingCart, MessageSquare, LogOut, Gift, Settings2, Megaphone } from 'lucide-react'; 
 
 const AdminDashboard = () => {
     const [logoutUser] = useLogoutUserMutation();
@@ -232,11 +241,18 @@ const AdminDashboard = () => {
                         </NavLink>
                     </li>
 
-                     {/* 🚀 NEW: MANAGE BUNDLES BUTTON */}
                     <li>
                         <NavLink to="/dashboard/manage-bundles" className={navItemStyle}>
                             <Settings2 size={18} strokeWidth={1.8} />
                             <span className="text-xs uppercase tracking-wider font-medium">Manage Hot Deals</span>
+                        </NavLink>
+                    </li>
+
+                    {/* 🚀 NEW: PROMO EMAILS SIDEBAR LINK */}
+                    <li>
+                        <NavLink to="/dashboard/send-promo" className={navItemStyle}>
+                            <Megaphone size={18} strokeWidth={1.8} className="text-orange-400" />
+                            <span className="text-xs uppercase tracking-wider font-medium">Promo Emails</span>
                         </NavLink>
                     </li>
 
@@ -246,8 +262,6 @@ const AdminDashboard = () => {
                             <span className="text-xs uppercase tracking-wider font-medium">Inventory</span>
                         </NavLink>
                     </li>
-
-    
 
                     <li>
                         <NavLink to="/dashboard/users" className={navItemStyle}>

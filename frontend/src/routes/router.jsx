@@ -12,6 +12,8 @@
 // import DashboardLayout from '../pages/dashboard/DashboardLayout';
 // import PrivateRoute from './PrivateRoute';
 // import SingleProduct from '../pages/shop/productdetais/SingleProduct';
+// // 🚀 Naya Import: Single Bundle Detail Page
+// import SingleBundle from '../pages/shop/productdetais/SingleBundle'; 
 // import PaymentSuccess from '../components/PaymentSuccess';
 // import UserOrders from '../pages/dashboard/user/UserOrders';
 // import UserPayments from '../pages/dashboard/user/UserPayments';
@@ -35,7 +37,7 @@
 // // 🚀 Bundle Deals Components
 // import AddBundle from '../pages/dashboard/admin/addProduct/AddBundle'; 
 // import ManageBundles from '../pages/dashboard/admin/manageProduct/ManageBundles';
-// import UpdateBundle from '../pages/dashboard/admin/manageProduct/UpdateBundle'; // 👈 Edit component import kiya
+// import UpdateBundle from '../pages/dashboard/admin/manageProduct/UpdateBundle'; 
 
 // const router = createBrowserRouter([
 //   {
@@ -48,6 +50,8 @@
 //       { path: '/shop', element: <ShopPage /> },
 //       { path: '/search', element: <Search /> },
 //       { path: '/shop/:id', element: <SingleProduct /> },
+//       // ✅ Naya Route: Jab Bundle par click ho
+//       { path: '/bundles/:id', element: <SingleBundle /> }, 
 //       { path: "/contact", element: <Contact /> },
 //       { path: "/checkout", element: <CheckoutPage /> },
 //       { path: "/payment-chat", element: <PaymentChat /> },
@@ -89,7 +93,7 @@
 //         path: 'manage-bundles',
 //         element: <PrivateRoute role="admin"><ManageBundles /></PrivateRoute>,
 //       },
-//       // ✅ Edit Hot Deal Route (Naya Add kiya)
+//       // ✅ Edit Hot Deal Route
 //       {
 //         path: 'edit-bundle/:id',
 //         element: <PrivateRoute role="admin"><UpdateBundle /></PrivateRoute>,
@@ -123,7 +127,6 @@
 // ]);
 
 // export default router;
-
 
 
 import React from 'react';
@@ -166,6 +169,9 @@ import CustomerPaymentChat from '../pages/dashboard/user/CustomerPaymentChat';
 import AddBundle from '../pages/dashboard/admin/addProduct/AddBundle'; 
 import ManageBundles from '../pages/dashboard/admin/manageProduct/ManageBundles';
 import UpdateBundle from '../pages/dashboard/admin/manageProduct/UpdateBundle'; 
+
+// 🚀 Naya Import: Send Promo Email Page (Admin)
+import SendPromoEmail from '../pages/dashboard/admin/SendPromoEmail';
 
 const router = createBrowserRouter([
   {
@@ -249,6 +255,11 @@ const router = createBrowserRouter([
       {
         path: 'chats/:id',
         element: <PrivateRoute role="admin"><AdminChatDetail /></PrivateRoute>,
+      },
+      // 🚀 Naya Route: Promotional Email Blast
+      {
+        path: 'send-promo',
+        element: <PrivateRoute role="admin"><SendPromoEmail /></PrivateRoute>,
       }
     ],
   },

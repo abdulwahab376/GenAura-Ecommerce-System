@@ -22,6 +22,14 @@
 //         body: credentials,
 //       }),
 //     }),
+//     // ✅ NEW: Google Login Endpoint
+//     googleLogin: builder.mutation({
+//       query: (googleData) => ({
+//         url: "/google-login",
+//         method: "POST",
+//         body: googleData,
+//       }),
+//     }),
 //     logoutUser: builder.mutation({
 //       query: () => ({
 //         url: "/logout",
@@ -62,9 +70,11 @@
 //   }),
 // });
 
+// // ✅ Exporting the new hook: useGoogleLoginMutation
 // export const {
 //   useRegisterUserMutation,
 //   useLoginUserMutation,
+//   useGoogleLoginMutation, 
 //   useLogoutUserMutation,
 //   useGetUserQuery,
 //   useDeleteUserMutation,
@@ -73,8 +83,6 @@
 // } = authApi;
 
 // export default authApi;
-
-
 
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
@@ -146,10 +154,18 @@ export const authApi = createApi({
         body: profileData,
       }),
     }),
+    // 🚀 NEW: Promotional Email Mutation
+    sendPromoEmail: builder.mutation({
+      query: (emailData) => ({
+        url: '/send-promo-email',
+        method: 'POST',
+        body: emailData,
+      }),
+    }),
   }),
 });
 
-// ✅ Exporting the new hook: useGoogleLoginMutation
+// ✅ Exporting hooks including the new one
 export const {
   useRegisterUserMutation,
   useLoginUserMutation,
@@ -158,7 +174,8 @@ export const {
   useGetUserQuery,
   useDeleteUserMutation,
   useUpdateUserRoleMutation,
-  useEditProfileMutation
+  useEditProfileMutation,
+  useSendPromoEmailMutation // 👈 Use this hook in your Admin component
 } = authApi;
 
 export default authApi;
