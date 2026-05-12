@@ -467,6 +467,7 @@ MAPPING RULES:
 8. If user says "orders" or "my orders", return: /dashboard/orders
 9. If user says "profile" or "my profile", return: /dashboard/profile
 10. If user says "payment support" or "support", return: /dashboard/payment-support
+11. If user says "reviews" or "my reviews", return: /dashboard/reviews
 
 STRICT RULES:
 - Return ONLY the raw path string. 
