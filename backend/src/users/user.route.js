@@ -439,9 +439,13 @@ router.post('/send-promo-email', async (req, res) => {
     }
 });
 
-// ✅ VOICE AI ASSISTANT ROUTE
+// ✅ VOICE AI ASSISTANT ROUTE (FIXED LOGS & API KEY)
 router.post('/voice-ai', async (req, res) => {
     const { command } = req.body;
+    
+    // 🎤 Terminal Log taake pata chalay request backend tak aayi
+    console.log("🎤 Voice Command Received in Backend:", command);
+
     try {
         const response = await axios.post(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -450,30 +454,24 @@ router.post('/voice-ai', async (req, res) => {
                 messages: [
                     {
                         role: "system",
-                        // user.route.js ke andar voice-ai route ka content
-content: `You are a strictly precise URL router for 'Lebaba Store'. 
-Map the user's voice command to these exact paths.
+          content: `You are a strictly precise URL router for 'Lebaba Store'.
 
-MAIN PAGES:
-- '/' (Home)
-- '/shop' (Shop/All Products)
-- '/checkout' (Cart/My Bag)
-- '/dashboard/orders' (My Orders)
-- '/dashboard/profile' (Profile)
-- '/contact' (Support/Contact)
+MAPPING RULES:
+1. If user says "home" or "main page", return ONLY: /
+2. If user says "men" or "men collection", return: /shop?mainCategory=men
+3. If user says "women" or "women collection", return: /shop?mainCategory=women
+4. If user says "kids" or "kids collection", return: /shop?mainCategory=kids
+5. If user says "shop" or "all products" or "collection", return: /shop
+6. If user says "contact" , return: /contact
+7. If user says "dashboard" or "open my dashboard", return: /dashboard
+8. If user says "orders" or "my orders", return: /dashboard/orders
+9. If user says "profile" or "my profile", return: /dashboard/profile
+10. If user says "payment support" or "support", return: /dashboard/payment-support
 
-SUB-CATEGORIES (Very Important):
-- If user says "Men's [item]", return: '/shop?category=[item]&mainCategory=men'
-  (Example: "men pants" -> /shop?category=pants&mainCategory=men)
-- If user says "Women's [item]", return: '/shop?category=[item]&mainCategory=women'
-  (Example: "women handbags" -> /shop?category=handbags&mainCategory=women)
-- If user says "Kids [item]", return: '/shop?category=[item]&mainCategory=kids'
-  (Example: "kids jackets" -> /shop?category=jackets&mainCategory=kids)
-
-SEARCH FALLBACK:
-- For general items like "red shoes" or "cheap watches", return: '/search?q=keyword'
-
-STRICT RULE: Return ONLY the raw path string. No quotes, no explanations.`
+STRICT RULES:
+- Return ONLY the raw path string. 
+- For Home, never return "/home", always return "/".
+- Do not include quotes or explanations.`
                     },
                     { role: "user", content: command }
                 ],
@@ -481,17 +479,21 @@ STRICT RULE: Return ONLY the raw path string. No quotes, no explanations.`
             },
             {
                 headers: {
-                    Authorization: `Bearer ${process.env.VITE_GROQ_API_KEY}`,
+                    // ✅ FIXED: Using GROQ_API_KEY from backend .env
+                    Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
                     "Content-Type": "application/json"
                 }
             }
         );
 
         const targetPath = response.data.choices[0].message.content.trim().replace(/['"`. ]/g, "");
+        console.log("🎯 AI Decided Path:", targetPath);
+        
         res.status(200).json({ path: targetPath });
+
     } catch (error) {
-        console.error("Voice AI Error:", error.message);
-        res.status(500).json({ path: '/shop' });
+        console.error("❌ Voice AI Error:", error.response ? error.response.data : error.message);
+        res.status(500).json({ path: '/shop', message: "AI Assistant Error" });
     }
 });
 
