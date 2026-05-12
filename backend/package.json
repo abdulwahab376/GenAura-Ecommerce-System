@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "@react-google-maps/api": "^2.20.8",
+    "axios": "^1.16.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cloudinary": "^2.4.0",

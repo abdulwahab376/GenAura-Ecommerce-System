@@ -36,38 +36,50 @@
 
 
 // // =============================
-// // Get All Products
+// // Get All Products (FIXED & OPTIMIZED)
 // // =============================
 // router.get("/", async (req, res) => {
 //   try {
-
-//     const { category, color, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
+//     const { category, mainCategory, color, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
 
 //     const filter = {};
 
-//     if (category && category !== "all") {
+//     // 1. Sub-category filter
+//     if (category && category !== "all" && category !== "") {
 //       filter.category = category;
 //     }
 
-//     if (color && color !== "all") {
+//     // 2. mainCategory filter
+//     if (mainCategory && mainCategory !== "all" && mainCategory !== "") {
+//       filter.mainCategory = mainCategory;
+//     }
+
+//     // 3. Color filter
+//     if (color && color !== "all" && color !== "") {
 //       filter.color = color;
 //     }
 
-//     if (minPrice && maxPrice) {
-
-//       const min = parseFloat(minPrice);
-//       const max = parseFloat(maxPrice);
-
-//       if (!isNaN(min) && !isNaN(max)) {
-//         filter.price = { $gte: min, $lte: max };
+//     // 4. Price Filter Logic (Flexible Version)
+//     if (minPrice !== undefined || maxPrice !== undefined) {
+//       filter.price = {};
+//       if (minPrice && minPrice !== "") {
+//         const min = parseFloat(minPrice);
+//         if (!isNaN(min)) filter.price.$gte = min;
 //       }
-
+//       if (maxPrice && maxPrice !== "" && maxPrice !== "Infinity") {
+//         const max = parseFloat(maxPrice);
+//         if (!isNaN(max)) filter.price.$lte = max;
+//       }
+      
+//       // Agar price object khali reh gaya ho to delete kar dein
+//       if (Object.keys(filter.price).length === 0) delete filter.price;
 //     }
 
 //     const skip = (parseInt(page) - 1) * parseInt(limit);
 
+//     // Database Queries
 //     const totalProducts = await Products.countDocuments(filter);
-//     const totalPages = Math.ceil(totalProducts / limit);
+//     const totalPages = Math.ceil(totalProducts / parseInt(limit));
 
 //     const products = await Products.find(filter)
 //       .skip(skip)
@@ -86,7 +98,6 @@
 //     res.status(500).send({ message: "Failed to fetch products" });
 //   }
 // });
-
 
 // // =============================
 // // Get Single Product
@@ -234,6 +245,7 @@
 
 
 
+
 const express = require("express");
 const Products = require("./products.model");
 const Reviews = require("../reviews/reviews.model");
@@ -245,7 +257,6 @@ const router = express.Router();
 // =============================
 router.post("/create-product", async (req, res) => {
   try {
-
     const newProduct = new Products({
       ...req.body
     });
@@ -272,7 +283,7 @@ router.post("/create-product", async (req, res) => {
 
 
 // =============================
-// Get All Products (FIXED & OPTIMIZED)
+// Get All Products (FIXED & CASE-INSENSITIVE)
 // =============================
 router.get("/", async (req, res) => {
   try {
@@ -280,22 +291,22 @@ router.get("/", async (req, res) => {
 
     const filter = {};
 
-    // 1. Sub-category filter
+    // 1. Sub-category filter (Added lowercase safety)
     if (category && category !== "all" && category !== "") {
-      filter.category = category;
+      filter.category = category.toLowerCase();
     }
 
-    // 2. mainCategory filter
+    // 2. mainCategory filter (Added lowercase safety for Women/Kids)
     if (mainCategory && mainCategory !== "all" && mainCategory !== "") {
-      filter.mainCategory = mainCategory;
+      filter.mainCategory = mainCategory.toLowerCase();
     }
 
     // 3. Color filter
     if (color && color !== "all" && color !== "") {
-      filter.color = color;
+      filter.color = color.toLowerCase();
     }
 
-    // 4. Price Filter Logic (Flexible Version)
+    // 4. Price Filter Logic
     if (minPrice !== undefined || maxPrice !== undefined) {
       filter.price = {};
       if (minPrice && minPrice !== "") {
@@ -307,7 +318,6 @@ router.get("/", async (req, res) => {
         if (!isNaN(max)) filter.price.$lte = max;
       }
       
-      // Agar price object khali reh gaya ho to delete kar dein
       if (Object.keys(filter.price).length === 0) delete filter.price;
     }
 
@@ -340,7 +350,6 @@ router.get("/", async (req, res) => {
 // =============================
 router.get("/:id", async (req, res) => {
   try {
-
     const productId = req.params.id;
 
     if (!productId || productId === "undefined") {
@@ -374,7 +383,6 @@ router.get("/:id", async (req, res) => {
 // =============================
 router.patch("/update-product/:id", async (req, res) => {
   try {
-
     const productId = req.params.id;
 
     if (!productId) {
@@ -408,7 +416,6 @@ router.patch("/update-product/:id", async (req, res) => {
 // =============================
 router.delete("/:id", async (req, res) => {
   try {
-
     const productId = req.params.id;
 
     if (!productId) {
@@ -439,7 +446,6 @@ router.delete("/:id", async (req, res) => {
 // =============================
 router.get("/related/:id", async (req, res) => {
   try {
-
     const { id } = req.params;
 
     if (!id || id === "undefined") {
