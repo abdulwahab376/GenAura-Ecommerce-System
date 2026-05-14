@@ -261,7 +261,7 @@ const Navbar = () => {
   const categoryData = {
     men: ["shirts", "pants", "shoes", "watches","jackets"],
     women: ["dress", "jewellery","shirts" ,"handbags", "cosmetics"],
-    kids: ["kids suits", "T-shirts", "pants" , "jackets","shoes"]
+    kids: ["kids suits", "T-shirts","jackets","shoes"]
   };
 
   const adminDropdownMenus = [

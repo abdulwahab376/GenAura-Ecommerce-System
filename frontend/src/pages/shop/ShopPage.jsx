@@ -132,7 +132,7 @@ const filters = {
     categories: {
         men: ['pants', 'shirts', 'shoes', 'watches', 'jackets'],
         women: ['dress', 'jewellery', 'cosmetics', 'shirts', 'handbags', 'jackets'],
-        kids: ['kids suits', 't-shirts', 'shoes', 'pants', 'jackets']
+        kids: ['kids suits', 't-shirts', 'shoes', 'jackets']
     },
     colors: ['all', 'black', 'red', 'gold', 'blue', 'silver', 'beige', 'green', 'purple', 'orange', 'white', 'pink', 'gray', 'brown'],
     priceRanges: [
