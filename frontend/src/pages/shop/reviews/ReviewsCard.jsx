@@ -22,10 +22,10 @@ const ReviewsCard = ({ productReviews }) => {
             <div>
                 {reviews.length > 0 ? (
                     <div className="space-y-8">
-                        <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-2">
+                        {/* <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-2">
                             <i className="ri-chat-3-line text-primary"></i>
                             Community Feedback ({reviews.length})
-                        </h3>
+                        </h3> */}
                         
                         <div className="space-y-6">
                             {reviews.map((review, index) => (
