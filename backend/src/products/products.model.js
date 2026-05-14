@@ -3,24 +3,18 @@
 // const ProductSchema = new mongoose.Schema(
 //   {
 //     name: { type: String, required: true },
-//     category: { type: String, required: true },
+//     category: { type: String, required: true }, // Sub-category (jackets, pants)
+    
+//     // ✅ YEH FIELD MISSING THI - ISAY ADD KAREIN
+//     mainCategory: { type: String, required: true }, // Men, Women, Kids
+    
 //     description: { type: String, required: true },
 //     price: { type: Number, required: true },
-    
-//     //  1. Yeh field add karein
 //     stock: { type: Number, default: 0 }, 
-
 //     oldPrice: { type: Number },
-    
-//     // Multiple images ke liye array
 //     image: [{ type: String, required: true }], 
-
-//     // Ab color aik string nahi, balki multiple colors ki list (Array) hai
 //     color: [{ type: String }],
-
-//     // Naya Field: Sizes ke liye array
 //     size: [{ type: String }],
-
 //     rating: { type: Number, default: 0 },
 //     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 //   },
@@ -32,6 +26,7 @@
 // module.exports = Products;
 
 
+
 const mongoose = require("mongoose");
 
 const ProductSchema = new mongoose.Schema(
@@ -39,8 +34,8 @@ const ProductSchema = new mongoose.Schema(
     name: { type: String, required: true },
     category: { type: String, required: true }, // Sub-category (jackets, pants)
     
-    // ✅ YEH FIELD MISSING THI - ISAY ADD KAREIN
-    mainCategory: { type: String, required: true }, // Men, Women, Kids
+    // ✅ Main Category (Men, Women, Kids)
+    mainCategory: { type: String, required: true }, 
     
     description: { type: String, required: true },
     price: { type: Number, required: true },
@@ -49,8 +44,26 @@ const ProductSchema = new mongoose.Schema(
     image: [{ type: String, required: true }], 
     color: [{ type: String }],
     size: [{ type: String }],
-    rating: { type: Number, default: 0 },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+    
+    // ⭐ Ratings & Reviews logic
+    rating: { type: Number, default: 0 }, // Average rating (e.g., 4.5)
+    
+    // ✅ Yeh field zaroori thi reviews count ke liye
+    reviews: [
+      { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Review' 
+      }
+    ],
+    
+    // ✅ Direct count store karne ke liye (Fast performance)
+    numReviews: { type: Number, default: 0 },
+
+    author: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User', 
+      required: true 
+    }
   },
   { timestamps: true }
 );

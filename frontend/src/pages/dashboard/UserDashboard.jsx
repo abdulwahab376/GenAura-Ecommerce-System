@@ -114,21 +114,23 @@ const UserDashboard = () => {
         }
     };
 
-   const userNavItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: 'ri-layout-line' },
-    { path: '/dashboard/orders', label: 'My Orders', icon: 'ri-shopping-bag-line' },
-    { path: '/dashboard/payments', label: 'Payments', icon: 'ri-bank-card-line' },
-    
-    // ❌ Ghalat path: { path: '/dashboard/chats', label: 'Payment Support', ... }
-    // ✅ Sahi path jo humne naya banaya hai:
-    { path: '/dashboard/payment-support', label: 'Payment Support', icon: 'ri-chat-smile-3-line' },
-    
-    { path: '/dashboard/profile', label: 'Profile Settings', icon: 'ri-user-settings-line' },
-    { path: '/dashboard/reviews', label: 'My Reviews', icon: 'ri-star-line' },
-];
+    const userNavItems = [
+        { path: '/dashboard', label: 'Dashboard', icon: 'ri-layout-line' },
+        { path: '/dashboard/orders', label: 'My Orders', icon: 'ri-shopping-bag-line' },
+        { path: '/dashboard/payments', label: 'Payments', icon: 'ri-bank-card-line' },
+        { path: '/dashboard/payment-support', label: 'Payment Support', icon: 'ri-chat-smile-3-line' },
+        { path: '/dashboard/profile', label: 'Profile Settings', icon: 'ri-user-settings-line' },
+        { path: '/dashboard/reviews', label: 'My Reviews', icon: 'ri-star-line' },
+    ];
 
     return (
-        <div className="space-y-5 bg-white p-6 md:h-screen flex flex-col justify-between shadow-lg border-r border-gray-100">
+        /* 
+           Yahan maine change kiya hai: 
+           1. 'md:fixed' taake sidebar apni jagah jam jaye.
+           2. 'md:w-64' ya 72 taake width barqarar rahe.
+           3. 'top-0' aur 'left-0' taake sidebar screen ke start mein rahe.
+        */
+        <div className="md:fixed md:top-0 md:left-0 md:w-72 h-screen bg-white p-6 flex flex-col justify-between shadow-lg border-r border-gray-100 z-50">
             <div>
                 <div className="nav__logo px-2">
                     <Link to="/" className="text-2xl font-bold text-primary">Lebaba<span>.</span></Link>

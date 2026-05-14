@@ -256,16 +256,6 @@ const AdminDMain = () => {
             {/* ===== FRIEND ORDERS SECTION ===== */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
 
-                <div className="p-4 bg-indigo-100 rounded">
-                    <p>Total Revenue</p>
-                    <h2>${totalRevenue.toFixed(2)}</h2>
-                </div>
-
-                <div className="p-4 bg-blue-100 rounded">
-                    <p>Total Orders</p>
-                    <h2>{totalOrders}</h2>
-                </div>
-
                 <div className="p-4 bg-orange-100 rounded">
                     <p>Pending</p>
                     <h2>{pendingOrders}</h2>

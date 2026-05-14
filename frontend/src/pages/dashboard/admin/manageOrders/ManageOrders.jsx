@@ -206,7 +206,7 @@ const ManageOrders = () => {
                                     {index + 1}
                                 </td>
 
-                                <td className="py-4 px-6 font-mono text-indigo-600 font-medium text-xs">
+                                <td className="py-4 px-6 font-mono text-indigo-600 font-bold text-xs">
                                     #{order._id.slice(-6)}
                                 </td>
                                 <td className="py-4 px-6 font-medium text-gray-800">{order?.email}</td>

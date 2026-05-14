@@ -86,7 +86,7 @@ const AdminStats = ({ stats }) => {
                         <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">+12%</span>
                     </div>
                     <div>
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-emerald-900/40">Revenue</p>
+                        <p className="text-[13px] uppercase tracking-widest font-bold text-emerald-900/40">Revenue</p>
                         <h2 className="text-xl font-black text-emerald-950">
                             {/* ✅ Updated to Rs. and formatted with toLocaleString */}
                             Rs. {Math.round(stats.totalEarnings || 0).toLocaleString()}
@@ -103,7 +103,7 @@ const AdminStats = ({ stats }) => {
                         <span className="text-[9px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">New</span>
                     </div>
                     <div>
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-blue-900/40">Orders</p>
+                        <p className="text-[13px] uppercase tracking-widest font-bold text-blue-900/40">Orders</p>
                         <h2 className="text-xl font-black text-blue-950">
                             {stats.totalOrders || 0}
                         </h2>
@@ -119,7 +119,7 @@ const AdminStats = ({ stats }) => {
                         <span className="text-[9px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Active</span>
                     </div>
                     <div>
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-purple-900/40">Customers</p>
+                        <p className="text-[13px] uppercase tracking-widest font-bold text-purple-900/40">Customers</p>
                         <h2 className="text-xl font-black text-purple-950">
                             {stats.totalUsers || 0}
                         </h2>
@@ -135,7 +135,7 @@ const AdminStats = ({ stats }) => {
                         <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Stock</span>
                     </div>
                     <div>
-                        <p className="text-[10px] uppercase tracking-widest font-bold text-amber-900/40">Inventory</p>
+                        <p className="text-[13px] uppercase tracking-widest font-bold text-amber-900/40">Products</p>
                         <h2 className="text-xl font-black text-amber-950">
                             {stats.totalProducts || 0}
                         </h2>
