@@ -6,6 +6,8 @@
 // import { addToCart } from '../../../redux/features/cart/cartSlice';
 // import ReviewsCard from '../reviews/ReviewsCard';
 // import { toast } from 'react-hot-toast';
+// // 🚀 Naya Component Import
+// import RelatedProducts from './RelatedProducts';
 
 // const SingleProduct = () => {
 //     const { id } = useParams();
@@ -97,7 +99,6 @@
 //                         </div>
                         
 //                         <div className="flex items-center gap-4 mb-6">
-//                             {/* ✅ UPDATED: Changed $ to Rs. */}
 //                             <span className="text-3xl font-black text-primary">Rs. {singleProduct?.price}</span>
 //                         </div>
 
@@ -167,18 +168,33 @@
 //                 </div>
 //             </section>
 
-//             <section className="section__container mt-16 border-t pt-10">
-//                 <div className="mb-8">
-//                     <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Customer Reviews</h3>
-//                     <p className="text-gray-500">Real feedback from our Lebaba community</p>
-//                 </div>
-//                 <ReviewsCard productReviews={productReviews}/>
-//             </section>
+//            {/* ✅ REVIEWS SECTION - Spacing kam kar di */}
+// <section className="section__container !mt-4 border-t !pt-4 !pb-0"> 
+//     <div className="mb-4"> {/* mb-8 ko mb-4 kiya */}
+//         <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Customer Reviews</h3>
+//         <p className="text-gray-500 text-sm">Real feedback from our Lebaba community</p>
+//     </div>
+//     <ReviewsCard productReviews={productReviews}/>
+// </section>
+
+//             {/* 🚀 RELATED PRODUCTS SECTION */}
+//            {/* 🚀 'section__container' ke sath '!mt-0 !pt-0' add karein */}
+// <div className="section__container !mt-0 !pt-0">
+//     <RelatedProducts 
+//         category={singleProduct?.category} 
+//         currentProductId={singleProduct?._id} 
+//     />
+// </div>
 //         </>
 //     );
 // };
 
 // export default SingleProduct;
+
+
+
+
+
 
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom'; 
@@ -188,8 +204,10 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
 import { toast } from 'react-hot-toast';
-// 🚀 Naya Component Import
 import RelatedProducts from './RelatedProducts';
+
+// 🚀 Tracking function import kiya
+import { trackClick } from '../../../utils/trackBehavior';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -203,6 +221,15 @@ const SingleProduct = () => {
     const [activeImage, setActiveImage] = useState("");
     const [selectedColor, setSelectedColor] = useState("");
     const [selectedSize, setSelectedSize] = useState("");
+
+    // 🚀 Tracking logic yahan add ki hai
+    useEffect(() => {
+        if (singleProduct?.category) {
+            // Product khulte hi uski category track hogi taake Recommendation update ho sake
+            trackClick(singleProduct.category);
+            console.log("🎯 Interest Tracked for AI:", singleProduct.category);
+        }
+    }, [singleProduct]);
 
     useEffect(() => {
         if (singleProduct?.image) {
@@ -342,31 +369,24 @@ const SingleProduct = () => {
                                 Buy Now
                             </button>
                         </div>
-                        
-                        {((singleProduct?.color?.length > 0 && !selectedColor) || (singleProduct?.size?.length > 0 && !selectedSize)) && (
-                            <p className="mt-3 text-red-500 text-[10px] font-bold animate-pulse uppercase tracking-tighter">* Please select color and size to proceed</p>
-                        )}
                     </div>
                 </div>
             </section>
 
-           {/* ✅ REVIEWS SECTION - Spacing kam kar di */}
-<section className="section__container !mt-4 border-t !pt-4 !pb-0"> 
-    <div className="mb-4"> {/* mb-8 ko mb-4 kiya */}
-        <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Customer Reviews</h3>
-        <p className="text-gray-500 text-sm">Real feedback from our Lebaba community</p>
-    </div>
-    <ReviewsCard productReviews={productReviews}/>
-</section>
+            <section className="section__container !mt-4 border-t !pt-4 !pb-0"> 
+                <div className="mb-4">
+                    <h3 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Customer Reviews</h3>
+                    <p className="text-gray-500 text-sm">Real feedback from our Lebaba community</p>
+                </div>
+                <ReviewsCard productReviews={productReviews}/>
+            </section>
 
-            {/* 🚀 RELATED PRODUCTS SECTION */}
-           {/* 🚀 'section__container' ke sath '!mt-0 !pt-0' add karein */}
-<div className="section__container !mt-0 !pt-0">
-    <RelatedProducts 
-        category={singleProduct?.category} 
-        currentProductId={singleProduct?._id} 
-    />
-</div>
+            <div className="section__container !mt-0 !pt-0">
+                <RelatedProducts 
+                    category={singleProduct?.category} 
+                    currentProductId={singleProduct?._id} 
+                />
+            </div>
         </>
     );
 };

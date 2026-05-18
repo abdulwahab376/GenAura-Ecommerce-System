@@ -18,3 +18,9 @@ export const getTopCategories = (limit = 3) => {
 export const clearBehavior = () => {
   localStorage.removeItem(KEY);
 };
+
+
+
+
+
+
