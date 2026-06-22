@@ -5,28 +5,29 @@
 // import avatarImg from "../assets/avatar.png";
 // import { logout } from '../redux/features/auth/authSlice';
 // import { useLogoutUserMutation } from '../redux/features/auth/authApi';
-// import io from "socket.io-client"; // ✅ 1. Socket client import karein
+// import { toggleCart } from '../redux/features/cart/cartSlice'; // ✅ 1. toggleCart import kiya
+// import io from "socket.io-client";
 
-// // ✅ 2. Socket connection set karein
 // const socket = io("http://localhost:5000"); 
 
 // const Navbar = () => {
 //   const products = useSelector((store) => store.cart.products);
-//   const [isCartOpen, setIsCartOpen] = useState(false);
-//   const handleCartToggle = () => setIsCartOpen(!isCartOpen);
-
+  
+//   // ✅ 2. Local state khatam karke Redux se "isOpen" uthaya
+//   const isCartOpen = useSelector((state) => state.cart.isOpen); 
 //   const dispatch = useDispatch();
+  
+//   // ✅ 3. Handle cart toggle ab Redux dispatch karega
+//   const handleCartToggle = () => dispatch(toggleCart());
+
 //   const [logoutUser] = useLogoutUserMutation();
 //   const { user } = useSelector((state) => state.auth);
 //   const navigate = useNavigate();
 
 //   const [activeCategory, setActiveCategory] = useState(null);
 //   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
-//   // Admin Notification State
 //   const [totalUnread, setTotalUnread] = useState(0);
 
-//   // ✅ 3. Database se Unread Count lane ka function
 //   const fetchUnreadCount = async () => {
 //     if (user?.role !== 'admin') return;
 //     try {
@@ -41,22 +42,15 @@
 //   };
 
 //   useEffect(() => {
-//     // Pehli baar load hone par DB se count lo
 //     fetchUnreadCount();
-
 //     if (user?.role === 'admin') {
-//       // ✅ 4. Live Socket Listener
 //       socket.on("admin_notification", () => {
-//         // Agar admin chat page par nahi hai to count barhao
 //         if (window.location.pathname !== "/dashboard/chats") {
 //           setTotalUnread(prev => prev + 1);
 //         }
 //       });
 //     }
-
-//     return () => {
-//       socket.off("admin_notification");
-//     };
+//     return () => { socket.off("admin_notification"); };
 //   }, [user]);
 
 //   const handleLogout = async () => {
@@ -67,11 +61,10 @@
 //     } catch (err) { console.error("Failed to logout:", err); }
 //   };
 
-//   // --- Category Data & Menus (Same as before) ---
 //   const categoryData = {
 //     men: ["shirts", "pants", "shoes", "watches","jackets"],
 //     women: ["dress", "jewellery","shirts" ,"handbags", "cosmetics"],
-//     kids: ["kids suits", "T-shirts", "pants" , "jackets","shoes"]
+//     kids: ["kids suits", "T-shirts","jackets","shoes"]
 //   };
 
 //   const adminDropdownMenus = [
@@ -147,8 +140,6 @@
 //                     referrerPolicy="no-referrer"
 //                     onError={(e) => { e.target.onerror = null; e.target.src = avatarImg; }}
 //                   />
-                  
-//                   {/* Notification Dot */}
 //                   {user.role === 'admin' && totalUnread > 0 && (
 //                     <span className="absolute -top-1 -right-1 flex h-4 w-4">
 //                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -186,12 +177,15 @@
 //           </div>
 //         </div>
 //       </nav>
-//       {isCartOpen && <CartModal products={products} isOpen={isCartOpen} onClose={handleCartToggle} />}
+
+//       {/* ✅ 4. Modal ab hamesha render hoga, uski apni Redux state usay control karegi */}
+//       <CartModal products={products} />
 //     </header>
 //   );
 // };
 
 // export default Navbar;
+
 
 
 
@@ -223,6 +217,7 @@ const Navbar = () => {
 
   const [activeCategory, setActiveCategory] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // ✅ Responsive Hamburger ke liye state add ki
   const [totalUnread, setTotalUnread] = useState(0);
 
   const fetchUnreadCount = async () => {
@@ -283,11 +278,21 @@ const Navbar = () => {
   const dropdownMenus = user?.role === 'admin' ? adminDropdownMenus : userDropdownMenus;
 
   return (
-    <header className="fixed-nav-bar w-nav bg-white shadow-sm">
-      <nav className="max-w-screen-2xl mx-auto px-4 flex justify-between items-center h-20">
+    <header className="fixed-nav-bar w-full bg-white shadow-sm z-50">
+      <nav className="max-w-screen-2xl mx-auto px-4 flex justify-between items-center h-20 relative">
         
-        {/* Navigation Links */}
-        <ul className="nav__links flex items-center gap-6">
+        {/* ✅ Hamburger Menu Toggle Icon (Sirf mobile view par dikhega) */}
+        <div className="flex items-center md:hidden">
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            className="text-2xl text-slate-700 hover:text-primary focus:outline-none"
+          >
+            <i className={isMobileMenuOpen ? "ri-close-line" : "ri-menu-line"}></i>
+          </button>
+        </div>
+
+        {/* ✅ Desktop Navigation Links (md:flex lagaya taake mobile par hide ho jaye) */}
+        <ul className="nav__links hidden md:flex items-center gap-6">
           <li className="link font-semibold hover:text-primary"><Link to="/">Home</Link></li>
           {Object.keys(categoryData).map((cat) => (
             <li key={cat} className="relative group py-2" onMouseEnter={() => setActiveCategory(cat)} onMouseLeave={() => setActiveCategory(null)}>
@@ -312,13 +317,13 @@ const Navbar = () => {
           <li className="link font-semibold hover:text-primary"><Link to="/contact">Contact</Link></li>
         </ul>
 
-        {/* Logo */}
-        <div className="nav__logo text-2xl font-black">
+        {/* Logo (Responsive text size handle kiya) */}
+        <div className="nav__logo text-xl sm:text-2xl font-black">
           <Link to="/">Lebaba<span className="text-primary">.</span></Link>
         </div>
 
-        {/* Icons & Profile */}
-        <div className="nav__icons flex items-center gap-5">
+        {/* Icons & Profile (Responsive gap maintain kiya) */}
+        <div className="nav__icons flex items-center gap-4 sm:gap-5">
           <Link to="/search" className="hover:text-primary"><i className="ri-search-line text-lg"></i></Link>
           <button onClick={handleCartToggle} className='hover:text-primary relative'>
             <i className="ri-shopping-bag-line text-lg"></i>
@@ -333,7 +338,7 @@ const Navbar = () => {
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     src={user.profileImage ? user.profileImage : avatarImg}
                     alt="User"
-                    className='size-10 rounded-full cursor-pointer object-cover ring-2 ring-primary/10 hover:ring-primary transition-all'
+                    className='size-9 sm:size-10 rounded-full cursor-pointer object-cover ring-2 ring-primary/10 hover:ring-primary transition-all'
                     referrerPolicy="no-referrer"
                     onError={(e) => { e.target.onerror = null; e.target.src = avatarImg; }}
                   />
@@ -374,6 +379,40 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+
+      {/* ✅ Naya Component View: Mobile Dropdown Menu (Sirf mobile screens par toggle hone par dikhega) */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 shadow-xl animate-fadeIn max-h-[75vh] overflow-y-auto">
+          <ul className="flex flex-col gap-4">
+            <li className="font-semibold text-slate-700 hover:text-primary py-1 border-b border-gray-50">
+              <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+            </li>
+            {Object.keys(categoryData).map((cat) => (
+              <li key={cat} className="flex flex-col gap-2 py-1 border-b border-gray-50">
+                <span className="font-black text-slate-400 uppercase tracking-widest text-[10px]">{cat} Categories</span>
+                <div className="flex flex-wrap gap-2 pl-1 pt-0.5">
+                  {categoryData[cat].map((sub) => (
+                    <Link 
+                      key={sub} 
+                      to={`/shop?category=${sub}&mainCategory=${cat}`} 
+                      className="text-xs font-bold bg-slate-50 text-slate-600 hover:text-primary hover:bg-primary/5 px-3 py-1.5 rounded-full transition-all capitalize" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {sub}
+                    </Link>
+                  ))}
+                </div>
+              </li>
+            ))}
+            <li className="font-semibold text-slate-700 hover:text-primary py-1 border-b border-gray-50">
+              <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)}>Shop</Link>
+            </li>
+            <li className="font-semibold text-slate-700 hover:text-primary py-1">
+              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact</Link>
+            </li>
+          </ul>
+        </div>
+      )}
 
       {/* ✅ 4. Modal ab hamesha render hoga, uski apni Redux state usay control karegi */}
       <CartModal products={products} />

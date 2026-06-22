@@ -39,6 +39,9 @@
 // import ManageBundles from '../pages/dashboard/admin/manageProduct/ManageBundles';
 // import UpdateBundle from '../pages/dashboard/admin/manageProduct/UpdateBundle'; 
 
+// // 🚀 Naya Import: Send Promo Email Page (Admin)
+// import SendPromoEmail from '../pages/dashboard/admin/SendPromoEmail';
+
 // const router = createBrowserRouter([
 //   {
 //     path: '/',
@@ -121,12 +124,18 @@
 //       {
 //         path: 'chats/:id',
 //         element: <PrivateRoute role="admin"><AdminChatDetail /></PrivateRoute>,
+//       },
+//       // 🚀 Naya Route: Promotional Email Blast
+//       {
+//         path: 'send-promo',
+//         element: <PrivateRoute role="admin"><SendPromoEmail /></PrivateRoute>,
 //       }
 //     ],
 //   },
 // ]);
 
 // export default router;
+
 
 
 import React from 'react';
@@ -139,6 +148,7 @@ import ErrorPage from '../components/ErrorPage';
 import Search from '../pages/search/Search';
 import Login from '../components/Login';
 import Register from '../components/Register';
+import ForgotPassword from '../components/ForgotPassword'; // ✅ Naya Import: Forgot Password component register kiya
 
 import DashboardLayout from '../pages/dashboard/DashboardLayout';
 import PrivateRoute from './PrivateRoute';
@@ -195,6 +205,7 @@ const router = createBrowserRouter([
   },
   { path: '/login', element: <Login /> },
   { path: '/register', element: <Register /> },
+  { path: '/forgot-password', element: <ForgotPassword /> }, // ✅ Naya Route: Forgot password ka path register kar diya
   {
     path: '/dashboard',
     element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
