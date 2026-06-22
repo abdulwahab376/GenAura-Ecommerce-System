@@ -215,7 +215,7 @@ const AdminDashboard = () => {
             <div>
                 <div className="nav__logo bg-white p-4 rounded-xl shadow-lg mb-8 border border-slate-200">
                     <Link to="/" className="text-xl font-black tracking-tighter text-slate-900">
-                        Lebaba<span className="text-red-600">.</span>
+                        GenAura<span className="text-red-600">.</span>
                     </Link>
                     <p className='text-[9px] uppercase tracking-widest font-bold text-slate-400'>Admin Panel</p>
                 </div>

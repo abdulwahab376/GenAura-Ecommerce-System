@@ -24,7 +24,7 @@ const Contact = () => {
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-2 uppercase tracking-widest">Call Us</h3>
             <p className="text-gray-500 mb-4">Monday - Saturday (9am - 6pm)</p>
-            <p className="text-primary font-black text-lg">+92 300 1234567</p>
+            <p className="text-primary font-black text-lg">+92 3061344687</p>
           </div>
 
           {/* Card 2: Email Us */}
@@ -67,7 +67,7 @@ const Contact = () => {
         {/* Social Link Section */}
         <div className="space-y-6">
           <h2 className="text-4xl font-black text-gray-900 leading-tight">
-            Connect with Lebaba <br /> in Jhelum
+            Connect with GenAura <br /> in Jhelum
           </h2>
           <p className="text-gray-600 text-lg leading-relaxed">
             From the banks of the Jhelum River to your doorstep. Join our growing community and experience the best of fashion with local trust.

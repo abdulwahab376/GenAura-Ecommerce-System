@@ -133,7 +133,7 @@ const UserDashboard = () => {
         <div className="md:fixed md:top-0 md:left-0 md:w-72 h-screen bg-white p-6 flex flex-col justify-between shadow-lg border-r border-gray-100 z-50">
             <div>
                 <div className="nav__logo px-2">
-                    <Link to="/" className="text-2xl font-bold text-primary">Lebaba<span>.</span></Link>
+                    <Link to="/" className="text-2xl font-bold text-primary">GenAura<span>.</span></Link>
                     <p className='text-xs italic text-gray-400'>Customer Portal</p>
                 </div>
                 <hr className='mt-5 mb-5 border-gray-100'/>

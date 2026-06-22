@@ -18,11 +18,11 @@ const Footer = () => {
                     </p>
                     <p>
                         <span><i className="ri-mail-fill"></i></span>
-                        support@Lebaba.com
+                        support@GenAura.com
                     </p>
                     <p>
                         <span><i className="ri-phone-fill"></i></span>
-                        +92361344687
+                        +923061344687
                     </p>
                 </div>
                 <div className="footer__col">
@@ -53,9 +53,7 @@ const Footer = () => {
                     </div>
                 </div>
             </footer>
-            <div className="footer__bar">
-                {/* Copyright © 2025 Web Design Mastery. All rights reserved. */}
-            </div>
+            
         </>
     )
 }

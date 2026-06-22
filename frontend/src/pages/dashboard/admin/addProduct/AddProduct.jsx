@@ -373,7 +373,7 @@ const AddProduct = () => {
     return (
         <div className="container mx-auto mt-8 p-6 bg-white shadow-md rounded-lg border">
             <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-2 uppercase tracking-tight">
-                Add New Product <span className="text-indigo-600">(Lebaba Inventory)</span>
+                Add New Product <span className="text-indigo-600">(GenAura Inventory)</span>
             </h2>
             
             <form onSubmit={handleSubmit} className="space-y-6">

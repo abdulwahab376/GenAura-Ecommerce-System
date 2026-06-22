@@ -85,7 +85,7 @@ const Register = () => {
             <Link to="/" className='inline-block transform hover:scale-105 transition-transform'>
                <div className='bg-white shadow-2xl rounded-2xl p-4 border border-white/20 mb-4'>
                   <h1 className='text-3xl font-black text-red-600 tracking-tighter'>
-                     Lebaba<span className='text-rose-400'>.</span>
+                     GenAura<span className='text-rose-400'>.</span>
                   </h1>
                </div>
             </Link>
