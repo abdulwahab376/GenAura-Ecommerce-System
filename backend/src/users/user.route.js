@@ -404,7 +404,7 @@ router.post('/voice-ai', async (req, res) => {
                 messages: [
                     {
                         role: "system",
-                                 content: `You are a strictly precise URL router for 'Lebaba Store'.
+                                 content: `You are a strictly precise URL router for 'GenAura Store'.
 
 MAPPING RULES:
 1. If user says "home" or "main page", return ONLY: /

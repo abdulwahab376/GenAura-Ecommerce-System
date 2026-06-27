@@ -1,17 +1,16 @@
-import React, { useMemo, useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Pencil, Sun, Monitor, CheckCircle } from 'lucide-react';
 import { useGetOrderByIdQuery } from '../redux/features/orders/orderApi';
-import { getBaseUrl } from '../utils/baseURL';
 import 'remixicon/fonts/remixicon.css';
 
-//  FREE MAP IMPORTS (No API Keys Required!)
+// FREE MAP IMPORTS (No API Keys Required!)
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // ------------------------------------------------------------------
-//  CUSTOM MAP ICONS (Using your Remix Icons!)
+// CUSTOM MAP ICONS (Using your Remix Icons!)
 // ------------------------------------------------------------------
 const truckIcon = new L.DivIcon({
   html: `<div style="background-color: #111827; color: white; padding: 6px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;">
@@ -19,7 +18,7 @@ const truckIcon = new L.DivIcon({
          </div>`,
   className: 'custom-leaflet-icon',
   iconSize: [36, 36],
-  iconAnchor: [18, 18], // Centers the icon on the coordinate
+  iconAnchor: [18, 18],
 });
 
 const storeIcon = new L.DivIcon({
@@ -40,50 +39,19 @@ const homeIcon = new L.DivIcon({
   iconAnchor: [16, 16],
 });
 
-
 const PaymentSuccess = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // URL se Direct Order ID uthayega
   const navigate = useNavigate();
-  const location = useLocation();
   
-  const [sessionOrder, setSessionOrder] = useState(null);
-  const [isConfirming, setIsConfirming] = useState(true);
-
-  // 1. Check for Stripe Session (if coming from checkout)
-  useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const sessionId = query.get('session_id');
-
-    if (sessionId) {
-      fetch(`${getBaseUrl()}/api/orders/confirm-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sessionId }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setSessionOrder(data.order);
-          setIsConfirming(false);
-        })
-        .catch((error) => {
-          console.error('Error confirming payment:', error);
-          setIsConfirming(false);
-        });
-    } else {
-      setIsConfirming(false);
-    }
-  }, [location.search]);
-
-  // 2. Fetch/Poll Order Data (Uses URL ID if present, otherwise session Order ID)
-  const orderIdToFetch = id || sessionOrder?._id || sessionOrder?.orderId;
-  const { data: orderResponse, isLoading: isFetching } = useGetOrderByIdQuery(orderIdToFetch, {
-    skip: !orderIdToFetch,
-    pollingInterval: 10000, // Live Polling!
+  // 1. Fetch/Poll Order Data Directly using Redux Query
+  const { data: orderResponse, isLoading: isFetching } = useGetOrderByIdQuery(id, {
+    skip: !id,
+    pollingInterval: 10000, // Har 10 seconds baad backend se data sync karega (Live Tracker!)
   });
 
-  const order = orderResponse?.order || orderResponse || sessionOrder;
+  const order = orderResponse?.order || orderResponse;
 
-  // 3. Status Mapping
+  // 2. Status Mapping (Determine current milestone)
   const currentStep = useMemo(() => {
     if (!order?.status) return 1;
     switch (order.status.toLowerCase()) {
@@ -95,7 +63,7 @@ const PaymentSuccess = () => {
     }
   }, [order?.status]);
 
-  // 4. Tracking Data
+  // 3. Tracking Meta Data Based on current status
   const trackingData = useMemo(() => {
     const map = {
       1: { location: 'Warehouse - Jhelum', status: 'Order Created', estimatedDelivery: 'March 23, 2026', progress: 5 },
@@ -106,20 +74,16 @@ const PaymentSuccess = () => {
     return map[currentStep] || map[1];
   }, [currentStep]);
 
-  // ------------------------------------------------------------------
-  //  MAP COORDINATE MATH (Calculates truck position!)
-  // ------------------------------------------------------------------
+  // 4. MAP COORDINATE MATH (Calculates truck position on straight line)
   const warehouseCoords = [32.9405, 73.7276]; // Jhelum
   const destinationCoords = [31.5204, 74.3587]; // Lahore
   
-  // Math to move the truck smoothly between city A and City B based on %
   const currentTruckCoords = [
     warehouseCoords[0] + ((destinationCoords[0] - warehouseCoords[0]) * (trackingData.progress / 100)),
     warehouseCoords[1] + ((destinationCoords[1] - warehouseCoords[1]) * (trackingData.progress / 100))
   ];
 
-  // Center the map slightly between the two points
-  const mapCenter = [32.2304, 74.0431];
+  const mapCenter = [32.2304, 74.0431]; // Map central focus point
 
   const timelineSteps = [
     { icon: Pencil, label: 'Your order has been created and is awaiting processing.' },
@@ -130,7 +94,8 @@ const PaymentSuccess = () => {
 
   const timestamp = order?.createdAt ? new Date(order.createdAt).toLocaleString() : 'Loading...';
 
-  if (isConfirming || (isFetching && !order)) return <div className="min-h-screen flex items-center justify-center font-bold text-gray-500">Loading Order...</div>;
+  // Loading & Error States
+  if (isFetching && !order) return <div className="min-h-screen flex items-center justify-center font-bold text-gray-500">Loading Order Tracking...</div>;
   if (!order) return <div className="min-h-screen flex items-center justify-center font-bold text-red-500">Order Not Found.</div>;
 
   return (
@@ -153,11 +118,11 @@ const PaymentSuccess = () => {
 
       {/* Content */}
       <main className="max-w-7xl mx-auto px-6 py-10">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">Payment {order.status}</h2>
-        <p className="text-sm text-gray-700 mb-1">Order ID: #{order._id || order.orderId}</p>
-        <p className="text-sm text-gray-700 mb-10 capitalize">Status: {order.status}</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2 capitalize">Order Status: {order.status}</h2>
+        <p className="text-sm text-gray-700 mb-1">Order ID: #{order._id}</p>
+        <p className="text-sm text-gray-700 mb-10 capitalize">Payment Status: {order.paymentStatus || 'Pending / COD'}</p>
 
-        {/* Timeline */}
+        {/* Timeline Horizontal Steps */}
         <div className="flex items-start justify-between mb-16 overflow-x-auto">
           {timelineSteps.map((step, i) => {
             const Icon = step.icon;
@@ -182,7 +147,7 @@ const PaymentSuccess = () => {
           })}
         </div>
 
-        {/* Live Tracking Section */}
+        {/* Live Tracking Details */}
         <div className="border-t border-gray-200 pt-8">
           <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
             <i className="ri-map-pin-line text-blue-600"></i> Live Map Tracking
@@ -219,7 +184,7 @@ const PaymentSuccess = () => {
             </div>
           </div>
 
-          {/*  REAL GEOGRAPHICAL MAP (Powered by OpenStreetMap) */}
+          {/* REAL GEOGRAPHICAL MAP */}
           <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm relative z-0">
             <MapContainer 
                 center={mapCenter} 
@@ -227,23 +192,22 @@ const PaymentSuccess = () => {
                 scrollWheelZoom={false} 
                 style={{ height: '400px', width: '100%', zIndex: 0 }}
             >
-              {/* Free Tile Layer from OpenStreetMap */}
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
 
-              {/* Start Pin (Warehouse) */}
+              {/* Start Pin - Warehouse */}
               <Marker position={warehouseCoords} icon={storeIcon}>
                 <Popup><b>Warehouse</b><br/>Jhelum, Punjab</Popup>
               </Marker>
 
-              {/* End Pin (Customer) */}
+              {/* End Pin - Customer */}
               <Marker position={destinationCoords} icon={homeIcon}>
                 <Popup><b>Delivery Address</b><br/>Lahore, Punjab</Popup>
               </Marker>
 
-              {/* The Live Truck! (Coordinates update automatically based on status) */}
+              {/* Moving Truck */}
               <Marker position={currentTruckCoords} icon={truckIcon}>
                 <Popup>
                     <b>Status: {order.status}</b><br/>

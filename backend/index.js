@@ -148,7 +148,7 @@ app.use('/api/bundles', bundleRoutes);
 
 // Root Route
 app.get('/', (req, res) => {
-  res.send('Lebaba Ecommerce Server is Running..!');
+  res.send('GenAura Ecommerce Server is Running..!');
 });
 
 // Upload Image Route
