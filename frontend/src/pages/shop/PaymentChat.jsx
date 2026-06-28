@@ -183,7 +183,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// 🚀 Added new mutations for delete and update
+// Added new mutations for delete and update
 import { 
     useGetChatByIdQuery, 
     useSendMessageMutation, 
@@ -206,8 +206,8 @@ const PaymentChat = () => {
     });
     
     const [sendMessageToDb] = useSendMessageMutation();
-    const [deleteMessage] = useDeleteMessageMutation(); // 🚀 Hook for delete
-    const [updateMessage] = useUpdateMessageMutation(); // 🚀 Hook for update
+    const [deleteMessage] = useDeleteMessageMutation(); //  Hook for delete
+    const [updateMessage] = useUpdateMessageMutation(); //  Hook for update
 
     const [inputText, setInputText] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
@@ -223,7 +223,7 @@ const PaymentChat = () => {
         createdAt: new Date()
     };
 
-    // 🚀 Logic: Instructor message top par, baki messages uske niche
+    // Logic: Instructor message top par, baki messages uske niche
     const messages = dbChat?.messages?.length > 0 
         ? [initialAdminMessage, ...dbChat.messages] 
         : [initialAdminMessage];
@@ -264,7 +264,7 @@ const PaymentChat = () => {
         setExistingImageUrl(null);
     };
 
-    // 🚀 Actual Delete Logic connected to API
+    // Actual Delete Logic connected to API
     const handleDelete = async (msgId) => {
         if (window.confirm("Are you sure you want to delete this message? This will also remove the image from database.")) {
             try {
@@ -293,7 +293,7 @@ const PaymentChat = () => {
 
             try {
                 if (editingMessageId) {
-                    // 🚀 Actual Update Logic connected to API
+                    // Actual Update Logic connected to API
                     await updateMessage({ orderId, messageId: editingMessageId, message: userMsg }).unwrap();
                 } else {
                     await sendMessageToDb({ id: orderId, message: userMsg }).unwrap();

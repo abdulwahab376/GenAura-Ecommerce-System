@@ -41,7 +41,6 @@ import reviewApi from "./features/reviews/reviewApi";
 import statsApi from "./features/stats/statsApi";
 import productsApi from "./features/products/productsApi";
 import { chatsApi } from './features/chats/chatsApi';
-// 🚀 Naya Bundle API Import
 import { bundleApi } from "./features/products/bundleApi"; 
 
 export const store = configureStore({
@@ -54,7 +53,7 @@ export const store = configureStore({
     [reviewApi.reducerPath]: reviewApi.reducer,
     [statsApi.reducerPath]: statsApi.reducer,
     [chatsApi.reducerPath]: chatsApi.reducer,
-    // ✅ Registering Bundle Reducer
+    // Registering Bundle Reducer
     [bundleApi.reducerPath]: bundleApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -65,7 +64,7 @@ export const store = configureStore({
       reviewApi.middleware,
       statsApi.middleware,
       chatsApi.middleware,
-      // ✅ Adding Bundle Middleware
+      // Adding Bundle Middleware
       bundleApi.middleware
     ),
 });

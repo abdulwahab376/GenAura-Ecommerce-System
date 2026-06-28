@@ -97,7 +97,7 @@ export const chatsApi = createApi({
                 method: 'PATCH',
                 body: { message }, 
             }),
-            // ✅ Yahan humne list aur specific chat dono ko refresh karne ka signal diya hai
+            // Yahan humne list aur specific chat dono ko refresh karne ka signal diya hai
             invalidatesTags: (result, error, { orderId }) => [
                 { type: 'Chats', id: orderId },
                 'Chats'

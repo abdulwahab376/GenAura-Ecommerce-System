@@ -91,11 +91,11 @@ export const productsApi = createApi({
   tagTypes: ["Products"],
   endpoints: (builder) => ({
     fetchAllProducts: builder.query({
-        // ✅ Alag se mainCategory parameter add kiya hai
+        // Alag se mainCategory parameter add kiya hai
         query: ({ category, mainCategory, color, minPrice, maxPrice, page = 1, limit = 10 }) => {
             const queryParams = new URLSearchParams({
                 category: category || '',
-                mainCategory: mainCategory || '', // ✅ Yeh backend ko bataye ga ke Men/Women/Kids filter karna hai
+                mainCategory: mainCategory || '', // Yeh backend ko bataye ga ke Men/Women/Kids filter karna hai
                 color: color || '',
                 minPrice: minPrice || 0,
                 maxPrice: maxPrice || '',

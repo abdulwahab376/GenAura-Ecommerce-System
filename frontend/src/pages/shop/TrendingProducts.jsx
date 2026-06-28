@@ -36,7 +36,6 @@
 // export default TrendingProducts;
 
 import React, { useState } from 'react';
-// import products from "../../data/products.json"; // ❌ Isay delete kar den
 import ProductCards from './ProductCards';
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi';
 
