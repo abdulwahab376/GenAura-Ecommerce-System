@@ -17,13 +17,13 @@ export const sendPromoEmail = async (req, res) => {
         });
 
         const mailOptions = {
-            from: `"Lebaba Promo" <${process.env.EMAIL_USER}>`,
+            from: `"GenAura Promo" <${process.env.EMAIL_USER}>`,
             bcc: emailList, 
             subject: subject,
             html: `
                 <div style="font-family: Arial; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
                     <div style="background: #000; padding: 20px; text-align: center;">
-                        <h1 style="color: #fff; margin: 0; letter-spacing: 2px;">LEBABA</h1>
+                        <h1 style="color: #fff; margin: 0; letter-spacing: 2px;">GenAura</h1>
                     </div>
                     <div style="padding: 30px; text-align: center;">
                         <h2 style="color: #333;">Special Update For You!</h2>

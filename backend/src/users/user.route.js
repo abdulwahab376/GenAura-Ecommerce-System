@@ -371,11 +371,11 @@ router.post('/send-promo-email', async (req, res) => {
         });
 
         const mailOptions = {
-            from: `"Lebaba Official" <${process.env.EMAIL_USER}>`,
+            from: `"GenAura Official" <${process.env.EMAIL_USER}>`,
             bcc: emailList,
             subject: subject,
             html: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
-                <div style="background: #000; padding: 20px; text-align: center;"><h1 style="color: #fff; margin:0; letter-spacing:5px;">LEBABA</h1></div>
+                <div style="background: #000; padding: 20px; text-align: center;"><h1 style="color: #fff; margin:0; letter-spacing:5px;">GenAura</h1></div>
                 <div style="padding: 40px 20px; text-align: center;">
                     <h2>${subject}</h2>
                     <p>${message}</p>

@@ -139,7 +139,7 @@ const SendPromoEmail = () => {
                 {/* Bottom Branding */}
                 <div className="mt-12 text-center">
                     <p className="text-slate-300 font-black text-4xl uppercase tracking-[15px] opacity-20 select-none">
-                        LEBABA ADMIN
+                        GENAURA ADMIN
                     </p>
                 </div>
             </div>
